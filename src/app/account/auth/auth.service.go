@@ -9,9 +9,11 @@ import (
 	"github.com/birukbelay/gocmn/src/generic"
 	cmn "github.com/birukbelay/gocmn/src/logger"
 	"github.com/birukbelay/gocmn/src/resp_const"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/projTemplate/goauth/src/models"
 	"github.com/projTemplate/goauth/src/models/config"
+	"github.com/projTemplate/goauth/src/models/enums"
 	"github.com/projTemplate/goauth/src/providers"
 )
 
@@ -123,4 +125,44 @@ func (aus Service) ResetToken(ctx context.Context, refreshToken string) (dtos.GR
 		UserData:   usr.Body,
 	}, resp.RowsAffected), nil
 
+}
+
+// RegisterCompanyOwner (acc-01)
+func (aus Service) RegisterCompanyOwner(ctx context.Context, input RegisterClientInput) (dtos.GResp[models.User], error) {
+	//Check if the email already exists
+	usr, err := generic.DbGetOne[models.User](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Email}, nil)
+	//if the user already exists
+	if err == nil {
+		/*if the user is active
+		if usr.Body.Status==StatusActive
+		*/
+		//If the User is not active
+		if usr.RowsAffected > 0 {
+			//FIXME Send password or email wrong depending on the scenario
+			return dtos.BadReqC[models.User](resp_const.UserExists), resp_const.UserExistError
+		}
+
+	}
+	//TODO: verify the Email
+
+	var userModel models.User
+	if err := mapstructure.Decode(input, &userModel); err != nil {
+		return dtos.BadReqM[models.User]("Decoding Input Error"), err
+	}
+
+	hash, err := ICrypt.BcryptCreateHash(input.Password)
+	if err != nil {
+		return dtos.InternalErrMS[models.User]("Hashing Error"), err
+	}
+	userModel.Password = hash
+	userModel.Role = enums.OWNER
+	// userModel.AccountStatus = enums.AccountPendingVerification
+	userModel.Active = false
+
+	user, err := generic.DbCreateOne[models.User](aus.Provider.GormConn, ctx, &userModel, nil)
+	if err != nil {
+		cmn.LogTrace("error crating", err)
+		return dtos.InternalErrMS[models.User]("creating Error"), err
+	}
+	return dtos.SuccessS(user.Body, user.RowsAffected), nil
 }

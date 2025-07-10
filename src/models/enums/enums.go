@@ -27,4 +27,5 @@ func (r Role) Value() (driver.Value, error) {
 const (
 	ADMIN = Role("ADMIN")
 	USER  = Role("USER")
+	OWNER = Role("OWNER")
 )
