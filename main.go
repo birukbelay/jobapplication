@@ -30,6 +30,6 @@ func main() {
 	//fileServ := diskUpload.NewDidkUploader(conf)
 	// cloudinaryServ := cloudinaryServ2.NewCloudinaryUploader(conf)
 	// providerService := providers.NewProviderServ(Db, conf, cloudinaryServ)
-	ginApp := IGin.Create(Idb.IProviderS{GormConn: Db}, conf)
+	ginApp := IGin.CreateFiber(Idb.IProviderS{GormConn: Db}, conf)
 	_ = ginApp.Listen()
 }

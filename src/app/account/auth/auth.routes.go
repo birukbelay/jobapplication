@@ -41,8 +41,8 @@ var PermissionMap = map[constant.OperationId][]enums.Role{
 	ApproveCompany: {enums.ADMIN},
 }
 
-func SetupAuthRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, serv *Service) {
-	handler := NewAuthHandler(cmnServ, serv)
+func SetupAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv *Service) {
+	handler := NewAuthHandler(providerS, serv)
 	tags := []string{"account_auth"}
 	path := constant.ApiV1 + "/auth"
 

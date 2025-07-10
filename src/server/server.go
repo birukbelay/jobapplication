@@ -87,12 +87,7 @@ func (s *MainServer) SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IProv
 	//account routes
 	auth.SetupAuthRoutes(humaRouter, dbs, auth.NewAuthServH(s.EnvConf, dbs))
 	// profile2.SetProfileRoutes(humaRouter, cmnService)
-	// //Admin Routes
 
-	// //Item Routes
-	// item.SetupItemRoutes(humaRouter, cmnService, item.NewGormServ(dbs.Gorm))
-	// batch.SetupBatchRoutes(humaRouter, cmnService, batch.NewGormServ(dbs.Gorm, cmnService))
-	// itemInstance.SetupItemInstanceRoutes(humaRouter, cmnService, itemInstance.NewGormServ(dbs.Gorm))
 	// //common routes
 	// upload2.SetupUploadRoutes(humaRouter, cmnService, upload2.NewUploadGormServ(dbs.Gorm, cmnService))
 }
