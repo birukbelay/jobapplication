@@ -9,9 +9,7 @@ type RegisterClientInput struct {
 	Avatar    string `json:"avatar" `
 }
 
-type VerifyUserInput struct {
-	Email string `json:"email" binding:"required,email" gorm:"unique"`
-}
+
 
 // VerificationInput is for sending verification code
 type VerificationInput struct {
@@ -26,6 +24,9 @@ type LoginData struct {
 	InfoType  string `json:"info_type,omitempty" `
 }
 
+type VerifyUserInput struct {
+	Email string `json:"email" binding:"required,email" gorm:"unique"`
+}
 type ChangePwdInput struct {
 	OldPwd string `json:"old_pwd"`
 	NewPwd string `json:"new_pwd"`

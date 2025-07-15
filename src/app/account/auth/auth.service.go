@@ -167,17 +167,16 @@ func (aus Service) ResetToken(ctx context.Context, refreshToken string) (dtos.GR
 		return dtos.BadReqC[TokenResponse](resp_const.DataNotFound), resp_const.UserNotFoundError
 	}
 
-	cmn.LogTrace("user is", usr.Body.HashedRefresh)
+	// cmn.LogTrace("user is", usr.Body.HashedRefresh)
 	if refreshToken != usr.Body.HashedRefresh {
 		return dtos.BadReqC[TokenResponse](resp_const.TokenDontMatch), resp_const.TokenDontMatchError
-
 	}
 
 	tokens, err := aus.GenerateTokens(&ICrypt.CustomClaims{Role: string(usr.Body.Role), UserId: usr.Body.ID})
 	if err != nil {
 		return dtos.InternalErrMS[TokenResponse](err.Error()), err
 	}
-	//we can put the refresh token on redis
+	//TODO: we can put the refresh token on redis
 	resp, eror := generic.DbUpdateOneById[models.Admin](aus.Provider.GormConn, ctx, usr.Body.ID, &models.Admin{HashedRefresh: tokens.RefreshToken}, nil)
 	if eror != nil {
 		return dtos.InternalErrMS[TokenResponse](eror.Error()), eror
@@ -192,17 +191,15 @@ func (aus Service) ResetToken(ctx context.Context, refreshToken string) (dtos.GR
 
 }
 
-func (aus Service) Logout(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
+func (aus Service) Logout(ctx context.Context, input RefreshTokenInput) (dtos.GResp[bool], error) {
 
 	panic("not implemented")
 }
 
 func (aus Service) ForgotPwd(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
-
 	panic("not implemented")
 }
 
 func (aus Service) ResetPwd(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
-
 	panic("not implemented")
 }
