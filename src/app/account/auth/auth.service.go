@@ -3,13 +3,17 @@ package auth
 import (
 	"context"
 	"errors"
+	"time"
 
 	ICrypt "github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/dtos"
 	"github.com/birukbelay/gocmn/src/generic"
+	"github.com/birukbelay/gocmn/src/logger"
 	cmn "github.com/birukbelay/gocmn/src/logger"
 	"github.com/birukbelay/gocmn/src/resp_const"
+	"github.com/birukbelay/gocmn/src/util"
 	"github.com/mitchellh/mapstructure"
+	"gorm.io/gorm/clause"
 
 	"github.com/projTemplate/goauth/src/models"
 	"github.com/projTemplate/goauth/src/models/config"
@@ -29,12 +33,93 @@ func NewAuthServH(conf *config.EnvConfig, genServ *providers.IProviderS) *Servic
 	}
 }
 
+// RegisterCompanyOwner (acc-01)
+func (aus Service) RegisterCompanyOwner(ctx context.Context, input RegisterClientInput) (dtos.GResp[models.Admin], error) {
+	//Check if the email already exists
+	usr, err := generic.DbGetOne[models.Admin](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Email}, nil)
+	//if the user already exists
+	logger.LogTrace("usr", usr)
+	if err == nil {
+		//TODO create a timeout
+		//If the User is still pending verification, throw error
+		if usr.RowsAffected > 0 && usr.Body.AccountStatus != enums.AccountPendingVerification {
+			//FIXME Send password or email wrong depending on the scenario
+			// return dtos.BadReqC[models.Admin](resp_const.UserExists), resp_const.UserExistError
+		}
+	}
+	//TODO: verify the Email
+
+	var userModel models.Admin
+	if err := mapstructure.Decode(input, &userModel); err != nil {
+		return dtos.BadReqM[models.Admin]("Decoding Input Error"), err
+	}
+
+	hash, err := ICrypt.BcryptCreateHash(input.Password)
+	if err != nil {
+		return dtos.InternalErrMS[models.Admin]("Hashing Error"), err
+	}
+	userModel.Password = hash
+	userModel.Role = enums.OWNER
+	userModel.AccountStatus = enums.AccountPendingVerification
+	userModel.Active = false
+
+	verificationCode := "0000"
+
+	codeHash, err := ICrypt.BcryptCreateHash(verificationCode)
+	if err != nil {
+		return dtos.InternalErrMS[models.Admin]("Hashing Error"), err
+	}
+	userModel.VerificationCodeHash = codeHash
+	//TODO change ptr with cmm/util
+	userModel.VerificationCodeExpire = models.Ptr(time.Now().Add(time.Minute * 3))
+
+	emailerr := aus.Provider.VerificationCodeSender.SendVerificationCode(input.Email, verificationCode)
+	if emailerr != nil {
+		return dtos.InternalErrMS[models.Admin]("Sending Email error"), emailerr
+	}
+
+	user, err := generic.DbUpsertOne[models.Admin](aus.Provider.GormConn, ctx, &userModel, []clause.Column{{Name: "email"}}, []string{"Password", "VerificationCodeHash", "VerificationCodeExpire", "AccountStatus", "Role", "Active"}, &generic.Opt{Debug: true})
+	if err != nil {
+		cmn.LogTrace("error crating", err)
+		return dtos.InternalErrMS[models.Admin]("creating Error"), err
+	}
+	return dtos.SuccessS(user.Body, user.RowsAffected), nil
+}
+
+// RegisterCompanyOwner (acc-01)
+func (aus Service) VerifyCompanyUser(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
+	//Check if the email already exists
+	usr, err := generic.DbGetOne[models.Admin](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Info, AccountStatus: enums.AccountPendingVerification}, nil)
+	//if the user already exists
+	if err != nil {
+		return dtos.BadReqC[bool](resp_const.InfoOrCode), resp_const.InfoOrCodeErr
+	}
+	if usr.Body.VerificationCodeExpire.Before(time.Now()) {
+		return dtos.BadReqC[bool](resp_const.InfoOrCode), resp_const.InfoOrCodeErr
+	}
+	valid := ICrypt.BcryptPasswordsMatch(input.Code, usr.Body.VerificationCodeHash)
+	if !valid {
+		return dtos.BadReqC[bool](resp_const.EmailOrPassword), resp_const.EmailOrPasswordErr
+	}
+
+	user, err := generic.DbUpdateByFilter[models.Admin](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Info}, models.Admin{AccountStatus: enums.AccountVerified, UserDto: models.UserDto{Active: true}}, nil)
+	if err != nil {
+		cmn.LogTrace("error crating", err)
+		return dtos.InternalErrMS[bool]("creating Error"), err
+	}
+	return dtos.SuccessS(true, user.RowsAffected), nil
+}
+
 // Login (acc-03)
 func (aus Service) Login(ctx context.Context, input LoginData) (dtos.GResp[TokenResponse], error) {
 	//1. check the user exists
-	usr, err := generic.DbGetOne[models.User](aus.Provider.GormConn, ctx, models.UserDto{Username: input.LoginInfo}, &generic.Opt{Debug: true})
+	usr, err := generic.DbGetOne[models.Admin](aus.Provider.GormConn, ctx, models.UserDto{Email: util.Ptr(input.LoginInfo)}, &generic.Opt{Debug: true})
 	if err != nil || usr.RowsAffected < 1 {
 		return dtos.BadReqC[TokenResponse](resp_const.EmailOrPassword), resp_const.EmailOrPasswordErr
+	}
+	//if the current user is not active return user not active error
+	if !usr.Body.Active {
+		return dtos.BadReqC[TokenResponse](resp_const.UserNotActive), resp_const.UserNotActiveErr
 	}
 	userCompany := ""
 	//if usr.Body.Role == enums.OWNER {
@@ -54,8 +139,8 @@ func (aus Service) Login(ctx context.Context, input LoginData) (dtos.GResp[Token
 		return dtos.InternalErrMS[TokenResponse](err.Error()), err
 	}
 
-	//TODO 4. Update The Users Refresh hash
-	usr, err = generic.DbUpdateOneById[models.User](aus.Provider.GormConn, ctx, usr.Body.ID, &models.User{HashedRefresh: tokens.RefreshToken}, nil)
+	//TODO 4. replace this with Sessions Table: that have info on date, device, ip and etc
+	usr, err = generic.DbUpdateOneById[models.Admin](aus.Provider.GormConn, ctx, usr.Body.ID, &models.Admin{HashedRefresh: tokens.RefreshToken}, nil)
 	if err != nil {
 		return dtos.InternalErrMS[TokenResponse](err.Error()), err
 	}
@@ -63,31 +148,10 @@ func (aus Service) Login(ctx context.Context, input LoginData) (dtos.GResp[Token
 		return dtos.InternalErrMS[TokenResponse]("token not updated"), errors.New("token Not Updated")
 	}
 
-	return dtos.SuccessS[TokenResponse](TokenResponse{
+	return dtos.SuccessS(TokenResponse{
 		AuthTokens: *tokens,
 		UserData:   usr.Body,
 	}, usr.RowsAffected), nil
-
-}
-
-func (aus Service) GenerateTokens(user *ICrypt.CustomClaims) (*AuthTokens, error) {
-	claims := &ICrypt.CustomClaims{
-		Role:      user.Role,
-		UserId:    user.UserId,
-		CompanyId: user.CompanyId,
-	}
-	accessToken, err := ICrypt.SignAccessToken(aus.Config.AccessSecret, 30, claims)
-	if err != nil {
-		return nil, err
-	}
-	refreshToken, err := ICrypt.SignRefreshToken(aus.Config.AccessSecret, 60*24*7, claims)
-	if err != nil {
-		return nil, err
-	}
-
-	return &AuthTokens{
-		accessToken, refreshToken,
-	}, nil
 
 }
 
@@ -98,7 +162,7 @@ func (aus Service) ResetToken(ctx context.Context, refreshToken string) (dtos.GR
 		return dtos.BadReqC[TokenResponse](resp_const.InvalidToken), resp_const.InvalidTokenError
 	}
 	cmn.LogTrace("claim", claims.UserId)
-	usr, err := generic.DbGetOneByID[models.User](aus.Provider.GormConn, ctx, claims.UserId, nil)
+	usr, err := generic.DbGetOneByID[models.Admin](aus.Provider.GormConn, ctx, claims.UserId, nil)
 	if err != nil {
 		return dtos.BadReqC[TokenResponse](resp_const.DataNotFound), resp_const.UserNotFoundError
 	}
@@ -113,56 +177,32 @@ func (aus Service) ResetToken(ctx context.Context, refreshToken string) (dtos.GR
 	if err != nil {
 		return dtos.InternalErrMS[TokenResponse](err.Error()), err
 	}
-	resp, eror := generic.DbUpdateOneById[models.User](aus.Provider.GormConn, ctx, usr.Body.ID, &models.User{HashedRefresh: tokens.RefreshToken}, nil)
+	//we can put the refresh token on redis
+	resp, eror := generic.DbUpdateOneById[models.Admin](aus.Provider.GormConn, ctx, usr.Body.ID, &models.Admin{HashedRefresh: tokens.RefreshToken}, nil)
 	if eror != nil {
 		return dtos.InternalErrMS[TokenResponse](eror.Error()), eror
 	}
 	if resp.RowsAffected < 1 {
 		return dtos.InternalErrMS[TokenResponse]("token not updated"), errors.New("token Not Updated")
 	}
-	return dtos.SuccessS[TokenResponse](TokenResponse{
+	return dtos.SuccessS(TokenResponse{
 		AuthTokens: *tokens,
 		UserData:   usr.Body,
 	}, resp.RowsAffected), nil
 
 }
 
-// RegisterCompanyOwner (acc-01)
-func (aus Service) RegisterCompanyOwner(ctx context.Context, input RegisterClientInput) (dtos.GResp[models.User], error) {
-	//Check if the email already exists
-	usr, err := generic.DbGetOne[models.User](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Email}, nil)
-	//if the user already exists
-	if err == nil {
-		/*if the user is active
-		if usr.Body.Status==StatusActive
-		*/
-		//If the User is not active
-		if usr.RowsAffected > 0 {
-			//FIXME Send password or email wrong depending on the scenario
-			return dtos.BadReqC[models.User](resp_const.UserExists), resp_const.UserExistError
-		}
+func (aus Service) Logout(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
 
-	}
-	//TODO: verify the Email
+	panic("not implemented")
+}
 
-	var userModel models.User
-	if err := mapstructure.Decode(input, &userModel); err != nil {
-		return dtos.BadReqM[models.User]("Decoding Input Error"), err
-	}
+func (aus Service) ForgotPwd(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
 
-	hash, err := ICrypt.BcryptCreateHash(input.Password)
-	if err != nil {
-		return dtos.InternalErrMS[models.User]("Hashing Error"), err
-	}
-	userModel.Password = hash
-	userModel.Role = enums.OWNER
-	// userModel.AccountStatus = enums.AccountPendingVerification
-	userModel.Active = false
+	panic("not implemented")
+}
 
-	user, err := generic.DbCreateOne[models.User](aus.Provider.GormConn, ctx, &userModel, nil)
-	if err != nil {
-		cmn.LogTrace("error crating", err)
-		return dtos.InternalErrMS[models.User]("creating Error"), err
-	}
-	return dtos.SuccessS(user.Body, user.RowsAffected), nil
+func (aus Service) ResetPwd(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
+
+	panic("not implemented")
 }

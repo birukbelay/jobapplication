@@ -28,14 +28,14 @@ const (
 
 	RegisterOwner       = constant.OperationId("Ow-1_RegisterOwner")
 	VerifyOwner         = constant.OperationId("Ow-2_VerifyOwner")
-	ApproveCompany      = constant.OperationId("Ad-1_ApproveCompany")
 	DeactivateMyCompany = constant.OperationId("Ow-4_DeactivateMyCompany")
 	UpdateMyCompany     = constant.OperationId("Ow-3_UpdateMyCompany")
+	ApproveCompany      = constant.OperationId("Ad-1_ApproveCompany")
 )
 
 var PermissionMap = map[constant.OperationId][]enums.Role{
 	RegisterOwner:  {},
-	VerifyOwner:    {enums.ADMIN},
+	VerifyOwner:    {},
 	Login:          {},
 	RefreshToken:   {},
 	ApproveCompany: {enums.ADMIN},
@@ -43,9 +43,22 @@ var PermissionMap = map[constant.OperationId][]enums.Role{
 
 func SetupAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv *Service) {
 	handler := NewAuthHandler(providerS, serv)
-	tags := []string{"account_auth"}
+	tags := []string{"admin_auth"}
 	path := constant.ApiV1 + "/auth"
 
+	huma.Register(humaRouter, huma.Operation{
+		OperationID: RegisterOwner.Str(),
+		Method:      http.MethodPost,
+		Path:        path + "/signup_owner",
+		Tags:        tags}, handler.RegisterOwner,
+	)
+
+	huma.Register(humaRouter, huma.Operation{
+		OperationID: VerifyOwner.Str(),
+		Method:      http.MethodPost,
+		Path:        path + "/verify_owner",
+		Tags:        tags}, handler.VerifyCompanyOwner,
+	)
 	huma.Register(humaRouter, huma.Operation{
 		OperationID: Login.Str(),
 		Method:      http.MethodPost,
@@ -61,12 +74,6 @@ func SetupAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv 
 
 	//===============  Depricated
 
-	huma.Register(humaRouter, huma.Operation{
-		OperationID: RegisterOwner.Str(),
-		Method:      http.MethodPost,
-		Path:        path + "/register_owner",
-		Tags:        tags}, handler.RegisterOwner,
-	)
 	// huma.Register(humaRouter, huma.Operation{
 	// 	OperationID: VerifyOwner.Str(),
 	// 	Method:      http.MethodPost,

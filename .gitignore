@@ -313,6 +313,6 @@ tmp/
 public/
 
 .devcontainer
-/public/*
+/public/assets/*
 !/public/static/
 !public/static

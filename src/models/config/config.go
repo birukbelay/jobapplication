@@ -2,12 +2,14 @@ package config
 
 type EnvConfig struct {
 	ServerPort string `koanf:"SERVER_PORT"`
-	ServerHost string `koanf:"SERVER_HOST"` // TODO: Remove
+	ServerHost string `koanf:"SERVER_HOST"`
 
 	SqlDbConfig SqlDbConfig `koanf:",squash"`
-	JwtVar                  // TODO: Remove
+	JwtVar
 	S3Config
 	CloudinaryConfig
+	KeyValConfig
+	SmtpCred
 }
 
 type S3Config struct {
@@ -34,6 +36,13 @@ type SqlDbConfig struct {
 	Driver   string `koanf:"SQL_DRIVER"`
 	SSLMode  string `koanf:"SSL_MODE"`
 }
+type KeyValConfig struct {
+	KVDbName   int    `koanf:"KV_DB"`
+	KVUsername string `koanf:"KV_USER"`
+	KVPassword string `koanf:"KV_PASSWORD"`
+	KVHost     string `koanf:"KV_HOST"`
+	KVPort     string `koanf:"KV_PORT"`
+}
 
 type JwtVar struct {
 	AccessSecret  string `koanf:"ACCESS_SECRET"`
@@ -41,4 +50,10 @@ type JwtVar struct {
 
 	AccessExpireMin  int `koanf:"ACCESS_SECRET_EXPIRE_MIN"`
 	RefreshExpireMin int `koanf:"REFRESH_SECRET_EXPIRES_MIN"`
+}
+type SmtpCred struct {
+	SmtpHost     string `koanf:"SMTP_HOST"`
+	SmtpPort     string `koanf:"SMTP_PORT"`
+	SmtpPwd      string `koanf:"SMTP_PWD"`
+	SmtpUsername string `koanf:"SMTP_USERNAME"`
 }

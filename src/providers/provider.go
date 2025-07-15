@@ -13,11 +13,15 @@ import (
 	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/src/models/enums"
+	"github.com/projTemplate/goauth/src/providers/email"
 )
 
 type IProviderS struct {
-	GormConn *gorm.DB
-	EnvConf  *config.EnvConfig
+	GormConn               *gorm.DB
+	EmailSender            email.EmailSender
+	VerificationCodeSender email.VerificationSender
+
+	EnvConf *config.EnvConfig
 	// UploadServ upload.FileUploadInterface
 	//will have upload services, email services
 }

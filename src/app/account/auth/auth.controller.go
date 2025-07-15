@@ -27,20 +27,24 @@ func CreateCookie(Name, Value string, minutes int) http.Cookie {
 func (ah *GinAuthHandler) Login(ctx context.Context, inputs *dtos.HumaReqBody[LoginData]) (*dtos.HumaResponse[dtos.GResp[TokenResponse]], error) {
 	tkn, err := ah.AuthServ.Login(ctx, inputs.Body)
 	if err != nil {
-		return dtos.HuReturnG(tkn, err)
+		return dtos.HumaReturnG(tkn, err)
 	}
 	refreshCookie := CreateCookie(Icnst.RefreshToken, tkn.Body.AuthTokens.RefreshToken, ah.AuthServ.Config.JwtVar.RefreshExpireMin)
 	accessCookie := CreateCookie(Icnst.AccessToken, tkn.Body.AuthTokens.AccessToken, ah.AuthServ.Config.JwtVar.AccessExpireMin)
-	return dtos.ReturnWithCookie(tkn, err, []http.Cookie{refreshCookie, accessCookie})
+	return dtos.HumaReturnGWithCookie(tkn, err, []http.Cookie{refreshCookie, accessCookie})
 }
 
 func (ah *GinAuthHandler) RefreshToken(ctx context.Context, inputs *dtos.HumaReqBody[RefreshTokenInput]) (*dtos.HumaResponse[dtos.GResp[TokenResponse]], error) {
 	tkn, err := ah.AuthServ.ResetToken(ctx, inputs.Body.Token)
 	refreshCookie := CreateCookie(Icnst.RefreshToken, tkn.Body.AuthTokens.RefreshToken, ah.AuthServ.Config.JwtVar.RefreshExpireMin)
 	accessCookie := CreateCookie(Icnst.AccessToken, tkn.Body.AuthTokens.AccessToken, ah.AuthServ.Config.JwtVar.AccessExpireMin)
-	return dtos.ReturnWithCookie(tkn, err, []http.Cookie{accessCookie, refreshCookie})
+	return dtos.HumaReturnGWithCookie(tkn, err, []http.Cookie{accessCookie, refreshCookie})
 }
-func (ah *GinAuthHandler) RegisterOwner(ctx context.Context, inputs *dtos.HumaReqBody[RegisterClientInput]) (*dtos.HumaResponse[dtos.GResp[models.User]], error) {
+func (ah *GinAuthHandler) RegisterOwner(ctx context.Context, inputs *dtos.HumaReqBody[RegisterClientInput]) (*dtos.HumaResponse[dtos.GResp[models.Admin]], error) {
 	usr, err := ah.AuthServ.RegisterCompanyOwner(ctx, inputs.Body)
-	return dtos.HuReturnG(usr, err)
+	return dtos.HumaReturnG(usr, err)
+}
+func (ah *GinAuthHandler) VerifyCompanyOwner(ctx context.Context, inputs *dtos.HumaReqBody[VerificationInput]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
+	usr, err := ah.AuthServ.VerifyCompanyUser(ctx, inputs.Body)
+	return dtos.HumaReturnG(usr, err)
 }

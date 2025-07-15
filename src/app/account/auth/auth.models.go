@@ -1,16 +1,12 @@
 package auth
 
-import (
-	IUsr "github.com/projTemplate/goauth/src/models"
-)
-
 // RegisterClientInput This is Used for creating and updating the user
 type RegisterClientInput struct {
-	FName    string `json:"fName" binding:"required,min=2" `
-	LName    string `json:"lName" `
-	Email    string `json:"email" binding:"required,email" gorm:"unique"`
-	Password string `json:"password" binding:"required,min=6"`
-	Avatar   string `json:"avatar" `
+	FirstName string `json:"fName" binding:"required,min=2" `
+	LastName  string `json:"lName" `
+	Email     string `json:"email" binding:"required,email" gorm:"unique"`
+	Password  string `json:"password" binding:"required,min=6"`
+	Avatar    string `json:"avatar" `
 }
 
 type VerifyUserInput struct {
@@ -49,7 +45,8 @@ type AuthTokens struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
+
 type TokenResponse struct {
 	AuthTokens AuthTokens `json:"auth_tokens"`
-	UserData   IUsr.User  `json:"user_data"`
+	UserData   any        `json:"user_data"`
 }
