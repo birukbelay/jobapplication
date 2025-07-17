@@ -13,12 +13,6 @@ type ContextKey string
 
 var CtxClaims = ContextKey("USER_CLAIMS")
 
-type OperationId string
-
-func (o OperationId) Str() string {
-	return string(o)
-}
-
 type EmailTemplatePaths string
 
 const (

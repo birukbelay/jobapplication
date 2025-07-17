@@ -3,9 +3,9 @@ package auth
 import (
 	"net/http"
 
+	constant "github.com/birukbelay/gocmn/src/consts"
 	"github.com/danielgtaylor/huma/v2"
 
-	constant "github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models/enums"
 	"github.com/projTemplate/goauth/src/providers"
 )
@@ -23,11 +23,14 @@ func NewAuthHandler(cmnServ *providers.IProviderS, serv *Service) *GinAuthHandle
 }
 
 const (
-	Login        = constant.OperationId("Au-1_Login")
-	RefreshToken = constant.OperationId("Au-2_RefreshToken")
+	RegisterOwner = constant.OperationId("Au-1_RegisterOwner")
+	VerifyOwner   = constant.OperationId("Au-2_VerifyOwner")
+	Login         = constant.OperationId("Au-3_Login")
+	RefreshToken  = constant.OperationId("Au-4_RefreshToken")
+	Logout        = constant.OperationId("Au-5_Logout")
+	ForgotPwd     = constant.OperationId("Au-6_ForgotPwd")
+	ResetPwd      = constant.OperationId("Au-7_ResetPwd")
 
-	RegisterOwner       = constant.OperationId("Ow-1_RegisterOwner")
-	VerifyOwner         = constant.OperationId("Ow-2_VerifyOwner")
 	DeactivateMyCompany = constant.OperationId("Ow-4_DeactivateMyCompany")
 	UpdateMyCompany     = constant.OperationId("Ow-3_UpdateMyCompany")
 	ApproveCompany      = constant.OperationId("Ad-1_ApproveCompany")
@@ -70,6 +73,24 @@ func SetupAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv 
 		Method:      http.MethodPost,
 		Path:        path + "/refresh",
 		Tags:        tags}, handler.RefreshToken,
+	)
+	huma.Register(humaRouter, huma.Operation{
+		OperationID: Logout.Str(),
+		Method:      http.MethodPost,
+		Path:        path + "/logout",
+		Tags:        tags}, handler.Logout,
+	)
+	huma.Register(humaRouter, huma.Operation{
+		OperationID: ForgotPwd.Str(),
+		Method:      http.MethodPost,
+		Path:        path + "/forgot_password",
+		Tags:        tags}, handler.ForgotPwd,
+	)
+	huma.Register(humaRouter, huma.Operation{
+		OperationID: ResetPwd.Str(),
+		Method:      http.MethodPost,
+		Path:        path + "/reset_password",
+		Tags:        tags}, handler.ResetPwd,
 	)
 
 	//===============  Depricated

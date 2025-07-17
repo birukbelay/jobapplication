@@ -18,16 +18,29 @@ type PasswordUpdateDto struct {
 
 // session will be put on redis, make it polymorphism for admin and users
 type Session struct {
-	Base             `mapstructure:",squash" `
-	RefreshTokenHash string
-	DeviceName       string
-	Blacklisted      bool
-	BlacklistedOn    *time.Time
-	UserId           string
+	Base          `mapstructure:",squash" `
+	SessionId     string `gorm:"uniqueIndex;not null"`
+	UserId        string `gorm:"not null"`
+	HashedRefresh string `gorm:"not null"`
+	DeviceInfo    string
+	// Blacklisted      bool
+	// BlacklistedOn    *time.Time
 }
 
-type VerificationCodes struct {
-	Base     `mapstructure:",squash" `
-	SendAt   time.Time
-	CodeHash string
+type VerificationCode struct {
+	Base      `mapstructure:",squash" `
+	UserId    string      `gorm:"uniqueIndex;not null"`
+	CodeHash  string      `gorm:"not null"`
+	Purpose   CodePurpose `gorm:"not null"`
+	ExpiresAt *time.Time  `json:"-" `
 }
+
+//=================================   !  CompanyStatus  ============================
+
+type CodePurpose string
+
+const (
+	Verification  = CodePurpose("verification")
+	PasswordReset = CodePurpose("password_reset")
+	TWOFA         = CodePurpose("2fa")
+)

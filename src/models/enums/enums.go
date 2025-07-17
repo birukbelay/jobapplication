@@ -50,7 +50,6 @@ const (
 //=================================   !  CompanyStatus  ============================
 
 type CompanyStatus string
-
 const (
 	CompanyPendingApproval = CompanyStatus("pending_approval")
 	CompanyApproved        = CompanyStatus("approved")

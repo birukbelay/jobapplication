@@ -1,7 +1,17 @@
 package auth
 
 import (
+	"context"
+	"time"
+
 	ICrypt "github.com/birukbelay/gocmn/src/crypto"
+	"github.com/birukbelay/gocmn/src/dtos"
+	"github.com/birukbelay/gocmn/src/generic"
+	cmn "github.com/birukbelay/gocmn/src/logger"
+	"github.com/birukbelay/gocmn/src/util"
+	"gorm.io/gorm/clause"
+
+	"github.com/projTemplate/goauth/src/models"
 )
 
 func (aus Service) GenerateTokens(user *ICrypt.CustomClaims) (*AuthTokens, error) {
@@ -24,4 +34,60 @@ func (aus Service) GenerateTokens(user *ICrypt.CustomClaims) (*AuthTokens, error
 		accessToken, refreshToken,
 	}, nil
 
+}
+func (aus Service) UTIL_SendVerification(ctx context.Context, email, userId string, purpose models.CodePurpose) (dtos.GResp[bool], error) {
+	//TODO genereate code here
+	verificationCode := "0000"
+
+	codeHash, err := ICrypt.BcryptCreateHash(verificationCode)
+	if err != nil {
+		return dtos.InternalErrMS[bool]("Hashing Error"), err
+	}
+	emailerr := aus.Provider.VerificationCodeSender.SendVerificationCode(email, verificationCode)
+	if emailerr != nil {
+		return dtos.InternalErrMS[bool]("Sending Email error"), emailerr
+	}
+	verificationResp, err := generic.DbUpsertOneAllFields[models.VerificationCode](aus.Provider.GormConn, ctx, models.VerificationCode{
+		ExpiresAt: util.Ptr(time.Now().Add(time.Minute * 3)),
+		CodeHash:  codeHash,
+		Purpose:   purpose,
+		UserId:    userId,
+	}, []clause.Column{{Name: "user_id"}}, nil)
+	if err != nil {
+		cmn.LogTrace("error crating", err)
+		return dtos.InternalErrMS[bool]("creating Error"), err
+	}
+	return dtos.SuccessS(true, verificationResp.RowsAffected), nil
+}
+func (aus Service) VerifyCode(ctx context.Context, userId string, code string) bool {
+	codeModel, err := generic.DbGetOne[models.VerificationCode](aus.Provider.GormConn, ctx, models.VerificationCode{UserId: userId}, nil)
+	if err != nil {
+		return false
+	}
+	if codeModel.Body.ExpiresAt.Before(time.Now()) {
+		return false
+	}
+	valid := ICrypt.BcryptPasswordsMatch(code, codeModel.Body.CodeHash)
+	if !valid {
+		return false
+	}
+	return true
+}
+func (aus Service) UTIL_MakeSession(ctx context.Context, sessionId, role, userId, companyId string) (*AuthTokens, error) {
+	//	3. Generate auth Token of password
+	tokens, err := aus.GenerateTokens(&ICrypt.CustomClaims{Role: role, UserId: userId, CompanyId: companyId, SessionId: sessionId})
+	if err != nil {
+		return nil, err
+	}
+	//4. hash the refresh token
+	refreshHash, err := ICrypt.ArgonCreateHash(tokens.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+	//4.Create a session or update previous's hashed_refresh
+	_, err = generic.DbUpsertOneListedFields[models.Session](aus.Provider.GormConn, ctx, models.Session{UserId: userId, HashedRefresh: refreshHash, SessionId: sessionId}, []clause.Column{{Name: "session_id"}}, []string{"hashed_refresh"}, &generic.Opt{Debug: true})
+	if err != nil {
+		return nil, err
+	}
+	return tokens, nil
 }

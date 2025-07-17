@@ -9,8 +9,6 @@ type RegisterClientInput struct {
 	Avatar    string `json:"avatar" `
 }
 
-
-
 // VerificationInput is for sending verification code
 type VerificationInput struct {
 	Info string `json:"info" validate:"required"`

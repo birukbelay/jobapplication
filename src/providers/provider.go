@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/birukbelay/gocmn/src/consts"
 	"github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/logger"
 	"github.com/birukbelay/gocmn/src/util"
@@ -27,7 +28,7 @@ type IProviderS struct {
 }
 
 // Authorization needs database service as well as configs
-func (gs *IProviderS) Authorization(operationId common.OperationId, needsAuth bool, allowedRoles ...enums.Role) func(ctx huma.Context, next func(huma.Context)) {
+func (gs *IProviderS) Authorization(operationId consts.OperationId, needsAuth bool, allowedRoles ...enums.Role) func(ctx huma.Context, next func(huma.Context)) {
 
 	return func(ctx huma.Context, next func(huma.Context)) {
 		if !needsAuth {

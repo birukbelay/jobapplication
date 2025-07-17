@@ -5,12 +5,13 @@
 - [x] signup
   - [x] test email sending
     - [x] test from field {cm:2025-07-15}
-- [ ] activate account
-- [ ] login
-- [ ] logout
-- [ ] reset tokens
+- [x] activate account
+- [x] login
+- [x] reset tokens
 - [ ] forgot password
 - [ ] reset password
+- [ ] logout
+- [ ] deploy
 
 ## profile
 

@@ -16,4 +16,10 @@ func MigrateDb2(Db *gorm.DB) {
 		log.Panicln(err.Error())
 		return
 	}
+	err = Db.AutoMigrate(&models.Session{}, &models.VerificationCode{})
+	if err != nil {
+		logger.LogTrace("failed to AutoMigrate session or Verification code:", err.Error())
+		log.Panicln(err.Error())
+		return
+	}
 }

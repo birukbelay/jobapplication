@@ -3,7 +3,7 @@ package profile
 import (
 	"net/http"
 
-	constant "github.com/birukbelay/gocmn/src/const"
+	constant "github.com/birukbelay/gocmn/src/consts"
 	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/projTemplate/goauth/src/models/enums"
