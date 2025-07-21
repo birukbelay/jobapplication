@@ -6,8 +6,8 @@ import "time"
 type ProfileUpdateDto struct {
 	FirstName string `json:"first_name,omitempty" minLength:"1"`
 	LastName  string `json:"last_name,omitempty" `
-	Email     string `json:"email,omitempty" format:"email"`
-	Avatar    string `json:"avatar,omitempty" `
+	// Email     string `json:"email,omitempty" format:"email"`
+	Avatar string `json:"avatar,omitempty" `
 }
 
 // PasswordUpdateDto This is Used for creating and updating the user
@@ -29,7 +29,8 @@ type Session struct {
 
 type VerificationCode struct {
 	Base      `mapstructure:",squash" `
-	UserId    string      `gorm:"uniqueIndex;not null"`
+	UserId    string `gorm:"uniqueIndex;not null"`
+	Email     string
 	CodeHash  string      `gorm:"not null"`
 	Purpose   CodePurpose `gorm:"not null"`
 	ExpiresAt *time.Time  `json:"-" `
@@ -40,7 +41,17 @@ type VerificationCode struct {
 type CodePurpose string
 
 const (
-	Verification  = CodePurpose("verification")
-	PasswordReset = CodePurpose("password_reset")
-	TWOFA         = CodePurpose("2fa")
+	SignupVerification = CodePurpose("SIGNUP_VERIFICATION")
+	PasswordReset      = CodePurpose("PASSWORD_RESET")
+	ChangeEmail        = CodePurpose("CHANGE_EMAIL")
+	TWOFA              = CodePurpose("2FA")
 )
+
+type ChangeEmailReqDto struct {
+	Password string `json:"password" minLength:"6"`
+	NewEmail string `json:"new_email,omitempty" minLength:"6"`
+}
+
+type VerifyEmailDto struct {
+	Code string `json:"code" `
+}

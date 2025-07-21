@@ -5,6 +5,8 @@ import (
 
 	"github.com/oklog/ulid/v2"
 	"gorm.io/gorm"
+
+	"github.com/projTemplate/goauth/src/models/enums"
 )
 
 func Ptr[T any](value T) *T {
@@ -22,4 +24,27 @@ func (m *Base) BeforeCreate(tx *gorm.DB) (err error) {
 		m.ID = ulid.Make().String()
 	}
 	return nil
+}
+
+type IntUsr interface {
+	GetID() string
+	GetRole() string
+	GetPwd() string
+	GetStatus() enums.AccountStatus
+}
+
+func (b Base) GetID() string {
+	return b.ID
+}
+func GetID[T IntUsr](t T) string {
+	return t.GetID()
+}
+func (u UserDto) GetRole() string {
+	return string(u.Role)
+}
+func (u UserDto) GetPwd() string {
+	return u.Password
+}
+func (u UserDto) GetStatus() enums.AccountStatus {
+	return u.AccountStatus
 }

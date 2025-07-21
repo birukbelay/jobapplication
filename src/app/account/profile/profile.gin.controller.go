@@ -13,25 +13,25 @@ import (
 	"github.com/projTemplate/goauth/src/models"
 )
 
-func (uh *HProfileHandler) GetMyProfile(ctx context.Context, _ *dtos.AuthParam) (*dtos.HumaResponse[dtos.GResp[models.User]], error) {
+func (uh *HProfileHandler[T]) GetMyProfile(ctx context.Context, _ *dtos.AuthParam) (*dtos.HumaResponse[dtos.GResp[T]], error) {
 	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
-	resp, err := sql_db.DbGetOneByID[models.User](uh.CmnServ.GormConn, ctx, v.UserId, nil)
-	return dtos.HumaReturnG[models.User](resp, err)
+	resp, err := sql_db.DbGetOneByID[T](uh.CmnServ.GormConn, ctx, v.UserId, nil)
+	return dtos.HumaReturnG(resp, err)
 }
 
-func (uh *HProfileHandler) UpdateMyProfile(ctx context.Context, filter *dtos.HumaReqBody[models.ProfileUpdateDto]) (*dtos.HumaResponse[dtos.GResp[models.User]], error) {
+func (uh *HProfileHandler[T]) UpdateMyProfile(ctx context.Context, filter *dtos.HumaReqBody[models.ProfileUpdateDto]) (*dtos.HumaResponse[dtos.GResp[T]], error) {
 	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
-	resp, err := sql_db.DbUpdateOneById[models.User](uh.CmnServ.GormConn, ctx, v.UserId, filter.Body, nil)
-	return dtos.HumaReturnG[models.User](resp, err)
+	resp, err := sql_db.DbUpdateOneById[T](uh.CmnServ.GormConn, ctx, v.UserId, filter.Body, nil)
+	return dtos.HumaReturnG(resp, err)
 }
 
-func (uh *HProfileHandler) UpdateMyPassword(ctx context.Context, input *dtos.HumaReqBody[models.PasswordUpdateDto]) (*dtos.HumaResponse[dtos.GResp[models.User]], error) {
+func (uh *HProfileHandler[T]) UpdateMyPassword(ctx context.Context, input *dtos.HumaReqBody[models.PasswordUpdateDto]) (*dtos.HumaResponse[dtos.GResp[T]], error) {
 	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")

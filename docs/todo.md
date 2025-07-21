@@ -1,5 +1,8 @@
 # tasks todo
 
+## general
+
+
 ## authentication
 
 - [x] signup
@@ -15,12 +18,21 @@
 
 ## profile
 
-- [ ] get me
-- [ ] change password
-- [ ] update my info
-- [ ] change email
+- [x] get me
+- [x] change password
+- [x] update my info
+- [x] change email
+  
+## company
 
+- Owners create a Company
+- Admins see list of created compaies
+- Admins approve companies
+-
 
-## general
+## invitation
 
-- make sure html files are included on deployment
+- create invitation codes
+- create invitation code for a company
+- users join with an invitation code after signup
+-

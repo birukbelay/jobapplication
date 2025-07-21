@@ -14,7 +14,7 @@ import (
 	"github.com/projTemplate/goauth/src/models"
 )
 
-func (aus Service) GenerateTokens(user *ICrypt.CustomClaims) (*AuthTokens, error) {
+func (aus Service[T]) GenerateTokens(user *ICrypt.CustomClaims) (*AuthTokens, error) {
 	claims := &ICrypt.CustomClaims{
 		Role:      user.Role,
 		UserId:    user.UserId,
@@ -35,7 +35,7 @@ func (aus Service) GenerateTokens(user *ICrypt.CustomClaims) (*AuthTokens, error
 	}, nil
 
 }
-func (aus Service) UTIL_SendVerification(ctx context.Context, email, userId string, purpose models.CodePurpose) (dtos.GResp[bool], error) {
+func (aus Service[T]) UTIL_SendVerification(ctx context.Context, email, userId string, purpose models.CodePurpose) (dtos.GResp[bool], error) {
 	//TODO genereate code here
 	verificationCode := "0000"
 
@@ -59,7 +59,8 @@ func (aus Service) UTIL_SendVerification(ctx context.Context, email, userId stri
 	}
 	return dtos.SuccessS(true, verificationResp.RowsAffected), nil
 }
-func (aus Service) VerifyCode(ctx context.Context, userId string, code string) bool {
+//VerifyCode TODO: add reason of error, like code expires
+func (aus Service[T]) VerifyCode(ctx context.Context, userId string, code string) bool {
 	codeModel, err := generic.DbGetOne[models.VerificationCode](aus.Provider.GormConn, ctx, models.VerificationCode{UserId: userId}, nil)
 	if err != nil {
 		return false
@@ -73,7 +74,7 @@ func (aus Service) VerifyCode(ctx context.Context, userId string, code string) b
 	}
 	return true
 }
-func (aus Service) UTIL_MakeSession(ctx context.Context, sessionId, role, userId, companyId string) (*AuthTokens, error) {
+func (aus Service[T]) UTIL_MakeSession(ctx context.Context, sessionId, role, userId, companyId string) (*AuthTokens, error) {
 	//	3. Generate auth Token of password
 	tokens, err := aus.GenerateTokens(&ICrypt.CustomClaims{Role: role, UserId: userId, CompanyId: companyId, SessionId: sessionId})
 	if err != nil {

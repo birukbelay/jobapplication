@@ -9,7 +9,7 @@ type RegisterClientInput struct {
 	Avatar    string `json:"avatar" `
 }
 
-// VerificationInput is for sending verification code
+// VerificationInput is for verifying registration email
 type VerificationInput struct {
 	Info string `json:"info" validate:"required"`
 	Code string ` json:"code" validate:"required" `
@@ -22,22 +22,8 @@ type LoginData struct {
 	InfoType  string `json:"info_type,omitempty" `
 }
 
-type VerifyUserInput struct {
-	Email string `json:"email" binding:"required,email" gorm:"unique"`
-}
-type ChangePwdInput struct {
-	OldPwd string `json:"old_pwd"`
-	NewPwd string `json:"new_pwd"`
-}
 type RefreshTokenInput struct {
 	Token string `json:"token"`
-}
-
-// PwdResetInput defines user password reset form struct
-type PwdResetInput struct {
-	NewPassword string `json:"new_password"  binding:"required"`
-	Code        string `json:"code"  binding:"required"`
-	Info        string `json:"info"`
 }
 
 type AuthTokens struct {
@@ -48,4 +34,17 @@ type AuthTokens struct {
 type TokenResponse struct {
 	AuthTokens AuthTokens `json:"auth_tokens"`
 	UserData   any        `json:"user_data"`
+}
+
+// =========================. password reset related
+
+type VerifyReqInput struct {
+	Email string `json:"email" binding:"required,email" gorm:"unique"`
+}
+
+// PwdResetInput defines user password reset form struct
+type PwdResetInput struct {
+	NewPassword string `json:"new_password"  binding:"required"`
+	Code        string `json:"code"  binding:"required"`
+	Info        string `json:"info"`
 }

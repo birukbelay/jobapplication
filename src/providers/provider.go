@@ -13,7 +13,6 @@ import (
 
 	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models/config"
-	"github.com/projTemplate/goauth/src/models/enums"
 	"github.com/projTemplate/goauth/src/providers/email"
 )
 
@@ -21,6 +20,7 @@ type IProviderS struct {
 	GormConn               *gorm.DB
 	EmailSender            email.EmailSender
 	VerificationCodeSender email.VerificationSender
+	KeyValServ             KeyValServ
 
 	EnvConf *config.EnvConfig
 	// UploadServ upload.FileUploadInterface
@@ -28,7 +28,7 @@ type IProviderS struct {
 }
 
 // Authorization needs database service as well as configs
-func (gs *IProviderS) Authorization(operationId consts.OperationId, needsAuth bool, allowedRoles ...enums.Role) func(ctx huma.Context, next func(huma.Context)) {
+func (gs *IProviderS) Authorization(operationId consts.OperationId, needsAuth bool, allowedRoles ...string) func(ctx huma.Context, next func(huma.Context)) {
 
 	return func(ctx huma.Context, next func(huma.Context)) {
 		if !needsAuth {
@@ -64,7 +64,7 @@ func (gs *IProviderS) Authorization(operationId consts.OperationId, needsAuth bo
 		ctx = huma.WithValue(ctx, string(common.CtxClaims), claims)
 		//=====================   Authorization ===================
 		if len(allowedRoles) > 0 {
-			if !util.ElementExists(enums.Role(claims.Role), allowedRoles...) {
+			if !util.ElementExists(claims.Role, allowedRoles...) {
 				ctx.SetStatus(http.StatusUnauthorized)
 				_, _ = ctx.BodyWriter().Write([]byte("Not Authorized"))
 				return

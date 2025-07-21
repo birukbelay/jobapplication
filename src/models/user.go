@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	Imdl "github.com/birukbelay/gocmn/src/dtos"
 
 	"github.com/projTemplate/goauth/src/models/enums"
@@ -12,27 +10,16 @@ type Admin struct {
 	Base `mapstructure:",squash" `
 
 	UserDto       `mapstructure:",squash" `
-	Password      string     `json:"-" `
-	Role          enums.Role `gorm:"default:OWNER" json:"role,omitempty" `
-	AccountStatus enums.AccountStatus
-	HashedRefresh string `json:"-" `
-	//below Fields are Used For Verification of users by code
-	VerificationCodeHash   string     `json:"-" `
-	VerificationCodeExpire *time.Time `json:"-" `
-	Company                Company    `gorm:"foreignKey:OwnerID"`
+	CompanyStatus string  `json:"company_status,omitempty" ` //approved, info filled,
+	Company       Company `gorm:"foreignKey:CompanyID"`
 }
 
 type User struct {
 	Base `mapstructure:",squash" `
 
-	UserDto       `mapstructure:",squash" `
-	Password      string     `json:"-" `
-	Role          enums.Role `gorm:"default:OWNER" json:"role,omitempty" `
-	HashedRefresh string     `json:"-" `
-	//below Fields are Used For Verification of users by code
-	VerificationCodeHash   string     `json:"-" `
-	VerificationCodeExpire *time.Time `json:"-" `
-	Company                Company    `json:"member_company,omitempty" gorm:"foreignKey:CompanyID"`
+	UserDto `mapstructure:",squash" `
+
+	Company Company `json:"member_company,omitempty" gorm:"foreignKey:CompanyID"`
 }
 
 type UserDto struct {
@@ -41,8 +28,12 @@ type UserDto struct {
 	Email     *string `json:"email,omitempty" format:"email"  gorm:"uniqueIndex" `
 	Username  string  `json:"username,omitempty"`
 	Avatar    string  `json:"avatar,omitempty" `
-	CompanyID string  `json:"company_id"`
+	CompanyID *string `json:"company_id"`
 	Active    bool    `json:"active,omitempty"`
+	//
+	Password      string     `json:"-" `
+	Role          enums.Role `gorm:"default:OWNER" json:"role,omitempty" `
+	AccountStatus enums.AccountStatus
 }
 type UserFilter struct {
 	ID            string     `query:"id,omitempty"`
@@ -56,6 +47,6 @@ type UserFilter struct {
 
 type UserQuery struct {
 	Imdl.PaginationInput `mapstructure:",squash"`
-	SelectedFields       []string `query:"selected_fields" enum:"f_name,l_name,email,avatar,company_id,account_status,id,created_at,updated_at"`
-	Sort                 string   `query:"sort" enum:"f_name,l_name,email,avatar,company_id,account_status,created_at,updated_at"`
+	SelectedFields       []string `query:"selected_fields" enum:"first_name,last_name,email,avatar,company_id,account_status,id,created_at,updated_at"`
+	Sort                 string   `query:"sort" enum:"first_name,last_name,email,avatar,company_id,account_status,created_at,updated_at"`
 }

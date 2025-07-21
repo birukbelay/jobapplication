@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	zlog "github.com/rs/zerolog/log"
 
-	"github.com/projTemplate/goauth/src/app/account/auth"
 	conf "github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/src/providers"
 )
@@ -85,7 +84,7 @@ func (s *MainServer) SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IProv
 	//core
 
 	//account routes
-	auth.SetupAuthRoutes(humaRouter, dbs, auth.NewAuthServH(s.EnvConf, dbs))
+	// auth.SetupAuthRoutes(humaRouter, dbs, auth.NewAuthServH(s.EnvConf, dbs))
 	// profile2.SetProfileRoutes(humaRouter, cmnService)
 
 	// //common routes

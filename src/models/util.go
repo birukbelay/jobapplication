@@ -1,6 +1,9 @@
 package models
 
-import "github.com/lib/pq"
+import (
+	"github.com/birukbelay/gocmn/src/consts"
+	"github.com/lib/pq"
+)
 
 type UploadStatus string
 
@@ -51,4 +54,13 @@ type UploadFilter struct {
 type UploadQuery struct {
 	SelectedFields []string `query:"selected_fields" enum:"name,display_name,url,user_id,path,hash,file_type,size,id,created_at,updated_at"`
 	Sort           string   `query:"sort" enum:"name,path,file_type,size,id,created_at,updated_at"`
+}
+
+//============ Operation access
+
+type OperationAccess struct {
+	OperationId  consts.OperationId `gorm:"primaryKey" json:"operation_id"`
+	AllowedRoles pq.StringArray     `gorm:"type:text[]" json:"allowedRoles,omitempty"`
+	GroupName    string
+	Description  string
 }

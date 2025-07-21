@@ -32,6 +32,10 @@ const (
 	OWNER = Role("OWNER")
 )
 
+func (r Role) S() string {
+	return string(r)
+}
+
 //=================================   !  AccountStatus  ============================
 
 type AccountStatus string
@@ -47,9 +51,14 @@ const (
 	AccountDeleted = AccountStatus("deleted") //When the user deletes his own account
 )
 
+func (r AccountStatus) S() string {
+	return string(r)
+}
+
 //=================================   !  CompanyStatus  ============================
 
 type CompanyStatus string
+
 const (
 	CompanyPendingApproval = CompanyStatus("pending_approval")
 	CompanyApproved        = CompanyStatus("approved")

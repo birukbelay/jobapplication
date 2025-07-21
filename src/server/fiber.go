@@ -12,6 +12,8 @@ import (
 	zlog "github.com/rs/zerolog/log"
 
 	"github.com/projTemplate/goauth/src/app/account/auth"
+	"github.com/projTemplate/goauth/src/app/account/profile"
+	"github.com/projTemplate/goauth/src/models"
 	conf "github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/src/providers"
 )
@@ -83,8 +85,10 @@ func (s *FiberServer) SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IPro
 	//core
 
 	//account routes
-	auth.SetupAuthRoutes(humaRouter, dbs, auth.NewAuthServH(s.EnvConf, dbs))
-	// profile2.SetProfileRoutes(humaRouter, cmnService)
+	auth.SetupAdminAuthRoutes(humaRouter, dbs, auth.NewAdminAuthServH[models.Admin](s.EnvConf, dbs))
+	auth.SetupUserAuthRoutes(humaRouter, dbs, auth.NewAdminAuthServH[models.User](s.EnvConf, dbs))
+	profile.SetAdminProfileRoutes(humaRouter, dbs)
+	profile.SetUserProfileRoutes(humaRouter, dbs)
 	// //Admin Routes
 
 	// //Item Routes
