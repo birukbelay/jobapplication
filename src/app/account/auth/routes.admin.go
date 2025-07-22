@@ -23,13 +23,13 @@ func NewAuthHandler[T models.IntUsr](cmnServ *providers.IProviderS, serv *Servic
 }
 
 const (
-	RegisterOwner = constant.OperationId("Ad-Au-1_RegisterOwner")
-	VerifyOwner   = constant.OperationId("Ad-Au-2_VerifyOwner")
-	Login         = constant.OperationId("Ad-Au-3_AdminLogin")
-	RefreshToken  = constant.OperationId("Ad-Au-4_AdminRefreshToken")
-	Logout        = constant.OperationId("Ad-Au-5_AdminLogout")
-	ForgotPwd     = constant.OperationId("Ad-Au-6_AdminForgotPwd")
-	ResetPwd      = constant.OperationId("Ad-Au-7_AdminResetPwd")
+	RegisterOwner = constant.OperationId("Ad_Au_1-RegisterOwner")
+	VerifyOwner   = constant.OperationId("Ad_Au_2-VerifyOwner")
+	Login         = constant.OperationId("Ad_Au_3-AdminLogin")
+	RefreshToken  = constant.OperationId("Ad_Au_4-AdminRefreshToken")
+	Logout        = constant.OperationId("Ad_Au_5-AdminLogout")
+	ForgotPwd     = constant.OperationId("Ad_Au_6-AdminForgotPwd")
+	ResetPwd      = constant.OperationId("Ad_Au_7-AdminResetPwd")
 )
 
 func SetupAdminAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv *Service[models.Admin]) {

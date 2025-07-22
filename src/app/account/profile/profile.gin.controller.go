@@ -40,6 +40,24 @@ func (uh *HProfileHandler[T]) UpdateMyPassword(ctx context.Context, input *dtos.
 	return dtos.HumaReturnG(resp, err)
 }
 
+func (uh *HProfileHandler[T]) UpdateMyEmailReq(ctx context.Context, input *dtos.HumaReqBody[models.ChangeEmailReqDto]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
+	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
+	if !ok {
+		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
+	}
+	resp, err := uh.Service.SendChangeEmail(ctx, v.UserId, input.Body)
+	return dtos.HumaReturnG(resp, err)
+}
+
+func (uh *HProfileHandler[T]) VerifyMyChangeEmailReq(ctx context.Context, input *dtos.HumaReqBody[models.VerifyEmailDto]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
+	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
+	if !ok {
+		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
+	}
+	resp, err := uh.Service.VerifyChangeEmail(ctx, v.UserId, input.Body)
+	return dtos.HumaReturnG(resp, err)
+}
+
 // func (uh *HProfileHandler) DeleteMyProfile(ctx context.Context, _ *dtos.AuthParam) (*dtos.HumaResponse[dtos.GResp[models.User]], error) {
 // 	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
 // 	if !ok {

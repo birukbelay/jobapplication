@@ -27,10 +27,10 @@ type CompanyUpdateDto struct {
 	Location string `json:"location,omitempty"`
 }
 type CompanyFilter struct {
-	ID      string
-	Name    string `query:"name" `
+	ID   string
+	Name string `query:"name" `
 	// OwnerID string `query:"owner_id,omitempty"`
-	Handle  string `json:"handle" `
+	Handle string `json:"handle" `
 
 	ItemCount int `query:"item_count"`
 }
@@ -38,6 +38,8 @@ type CompanyQuery struct {
 	SelectedFields []string `query:"selected_fields" enum:"name,about,location,owner_id, id,created_at,updated_at"`
 	Sort           string   `query:"sort" enum:"name,created_at,updated_at"`
 }
+
+//==============. Invite Codes
 
 type InvitaionCode struct {
 	Base            `mapstructure:",squash" `
