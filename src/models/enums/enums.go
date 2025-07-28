@@ -56,7 +56,7 @@ const (
 	AccountActive = AccountStatus("active")
 
 	AccountDisabled = AccountStatus("disabled") //when it is Disabled by the admin
-	//old
+
 	AccountDeleted = AccountStatus("deleted") //When the user deletes his own account
 )
 

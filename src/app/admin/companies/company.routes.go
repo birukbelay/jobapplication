@@ -38,6 +38,7 @@ const (
 	OffsetPaginatedCompanies = consts.OperationId("Ad_Cp-1-OffsetPaginatedCompanies")
 	GetOneCompanyById        = consts.OperationId("Ad_Cp-2-GetOneCompanyById")
 	UpdateCompany            = consts.OperationId("Ad_Cp-3-UpdateCompany")
+	ApproveCompany           = consts.OperationId("Ad_Cp-4-ApproveCompany")
 	// DisableCompany = consts.OperationId("Pr_1-DisableCompany")
 	// OwnerCreateCompany       = consts.OperationId("Pr_1-GetMyProfile")
 )
@@ -46,6 +47,7 @@ var OperationMap = map[consts.OperationId]models.OperationAccess{
 	OffsetPaginatedCompanies: {AllowedRoles: []string{enums.PLATFORM_ADMIN.S()}, Description: ""},
 	GetOneCompanyById:        {AllowedRoles: []string{enums.PLATFORM_ADMIN.S()}, Description: ".."},
 	UpdateCompany:            {AllowedRoles: []string{enums.PLATFORM_ADMIN.S()}, Description: ".."},
+	ApproveCompany:           {AllowedRoles: []string{enums.PLATFORM_ADMIN.S()}, Description: ".."},
 }
 
 func SetupManageCompaniesRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, serv *Service) {
@@ -60,7 +62,7 @@ func SetupManageCompaniesRoutes(humaRouter huma.API, cmnServ *providers.IProvide
 		Method:      http.MethodGet,
 		Path:        path,
 		Tags:        tags,
-		// Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedCompanies, true, OperationMap[OffsetPaginatedCompanies].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedCompanies, true, OperationMap[OffsetPaginatedCompanies].AllowedRoles...)},
 	}, genericController.OffsetPaginated,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -68,7 +70,7 @@ func SetupManageCompaniesRoutes(humaRouter huma.API, cmnServ *providers.IProvide
 		Method:      http.MethodGet,
 		Path:        pathId,
 		Tags:        tags,
-		// Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneCompanyById, true, OperationMap[GetOneCompanyById].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneCompanyById, true, OperationMap[GetOneCompanyById].AllowedRoles...)},
 	}, genericController.GHandler.GetOneById,
 	)
 
@@ -78,17 +80,17 @@ func SetupManageCompaniesRoutes(humaRouter huma.API, cmnServ *providers.IProvide
 		Method:      http.MethodPatch,
 		Path:        pathId,
 		Tags:        tags,
-		// Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateCompany, true, OperationMap[UpdateCompany].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateCompany, true, OperationMap[UpdateCompany].AllowedRoles...)},
 	}, genericController.GHandler.UpdateOneById,
 	)
 
 	//------------- used to approve companies
 	huma.Register(humaRouter, huma.Operation{
-		OperationID: UpdateCompany.Str(),
+		OperationID: ApproveCompany.Str(),
 		Method:      http.MethodPatch,
 		Path:        pathId + "/approve",
 		Tags:        tags,
-		// Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateCompany, true, OperationMap[UpdateCompany].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(ApproveCompany, true, OperationMap[UpdateCompany].AllowedRoles...)},
 	}, genericController.ApproveCompany,
 	)
 }
