@@ -33,7 +33,7 @@ func main() {
 	//fileServ := diskUpload.NewDidkUploader(conf)
 	// cloudinaryServ := cloudinaryServ2.NewCloudinaryUploader(conf)
 	// providerService := providers.NewProviderServ(Db, conf, cloudinaryServ)
-	emailSender := email.NewVerificationCodeSender(conf.SmtpHost, conf.SmtpPort, conf.SmtpPwd, conf.SmtpUsername)
-	ginApp := IGin.CreateFiber(Idb.IProviderS{GormConn: Db, EnvConf: conf, VerificationCodeSender: emailSender}, conf)
+	emailSender := email.NewSmtp(conf.SmtpHost, conf.SmtpPort, conf.SmtpPwd, conf.SmtpUsername)
+	ginApp := IGin.CreateFiber(Idb.IProviderS{GormConn: Db, EnvConf: conf, VerificationCodeSender: emailSender, EmailSender: emailSender}, conf)
 	_ = ginApp.Listen()
 }

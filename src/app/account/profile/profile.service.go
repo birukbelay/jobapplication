@@ -10,6 +10,7 @@ import (
 
 	"github.com/projTemplate/goauth/src/models"
 	"github.com/projTemplate/goauth/src/providers"
+	"github.com/projTemplate/goauth/src/providers/db/redis"
 )
 
 type Service[T models.IntUsr] struct {
@@ -23,7 +24,7 @@ func NewProfileServH[T models.IntUsr](genServ *providers.IProviderS) *Service[T]
 }
 
 // ChangePassword .
-func (aus *Service[T]) ChangePassword(ctx context.Context, userId string, input models.PasswordUpdateDto) (dtos.GResp[T], error) {
+func (aus *Service[T]) ChangePassword(ctx context.Context, userId, sessionId string, input models.PasswordUpdateDto) (dtos.GResp[T], error) {
 	resp, err := sql_db.DbGetOne[T](aus.ProvServ.GormConn, ctx, models.UserFilter{ID: userId}, nil)
 	if err != nil {
 		return resp, err
@@ -37,7 +38,22 @@ func (aus *Service[T]) ChangePassword(ctx context.Context, userId string, input 
 		return dtos.InternalErrMS[T]("Hashing Error"), err
 	}
 	updateResp, err := sql_db.DbUpdateOneById[T](aus.ProvServ.GormConn, ctx, userId, models.UserDto{Password: hash}, nil)
-	//TODO: reset Logged in things
+	if err != nil {
+		return dtos.InternalErrMS[T]("Update Error"), err
+	}
+
+	_, err = sql_db.DbDeleteByFilter[models.Session](aus.ProvServ.GormConn, ctx, models.Session{UserId: userId, SessionId: sessionId}, nil)
+	if err != nil {
+		return dtos.InternalErrMS[T]("Session Removing error"), err
+	}
+	//blacklist all the session
+	sessions, err := sql_db.DbFetchManyWithOffset[models.Session](aus.ProvServ.GormConn, ctx, models.Session{UserId: userId}, dtos.PaginationInput{Limit: 10000}, nil)
+	if err != nil {
+
+	}
+	for _, val := range sessions.Body {
+		err = redis.BlacklistSession(aus.ProvServ.KeyValServ, ctx, val.SessionId)
+	}
 	return updateResp, err
 }
 
@@ -83,5 +99,6 @@ func (aus *Service[T]) VerifyChangeEmail(ctx context.Context, userId string, inp
 	if err != nil {
 		return dtos.InternalErrMS[bool](err.Error()), err
 	}
+	//TODO: black list all the sessions here
 	return dtos.SuccessS(true, updateResp.RowsAffected), nil
 }

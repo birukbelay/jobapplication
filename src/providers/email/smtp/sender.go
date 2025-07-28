@@ -23,6 +23,15 @@ type SmtpSender struct {
 	From     string
 }
 
+func NewSmtp(host, port, pwd, from string) *SmtpSender {
+	return &SmtpSender{
+		Host:     host,
+		Port:     port,
+		Password: pwd,
+		From:     from,
+	}
+}
+
 func NewSmtpSender(host, port, pwd, from string) email.EmailSender {
 	return &SmtpSender{
 		Host:     host,
@@ -42,13 +51,50 @@ func NewVerificationCodeSender(host, port, pwd, from string) email.VerificationS
 }
 
 // SendEmail sends an email using Gmail SMTP
-func (h *SmtpSender) SendEmail(fields email.EmailFields, templateStruct any) error {
-	// Parse the email template
-	body, err := ParseEmailTemplate(fields.HtmlPath, templateStruct)
+func (h *SmtpSender) SendVerificationCode(to string, code string) error {
+
+	f, err := templates.Embedded.Open(email.VerificationCodeTemplate.S())
+	if err != nil {
+		panic(err)
+	}
+	verificationData := VerificationCodeData{
+		Code: code,
+		Name: "Mr",
+	}
+	body, err := email.ParseEmbededTemplate(f, verificationData)
 	if err != nil {
 		return err
 	}
-	return h.SendEmailT(fields, body)
+
+	emailFields := email.EmailFields{
+		To:      to,
+		From:    h.From,
+		Subject: "Verify Your Email",
+	}
+
+	return h.SendEmailT(emailFields, body)
+}
+
+// SendEmail sends an email using Gmail SMTP
+func (h *SmtpSender) SendEmail(to, subject string, templatePath email.EmailTemplates, templateStruct any) error {
+
+	f, err := templates.Embedded.Open(templatePath.S())
+	if err != nil {
+		panic(err)
+	}
+
+	body, err := email.ParseEmbededTemplate(f, templateStruct)
+	if err != nil {
+		return err
+	}
+
+	emailFields := email.EmailFields{
+		To:      to,
+		From:    h.From,
+		Subject: subject,
+	}
+
+	return h.SendEmailT(emailFields, body)
 }
 
 // SendEmail sends an email using Gmail SMTP
@@ -86,6 +132,8 @@ func (h *SmtpSender) SendEmailT(fields email.EmailFields, body string) error {
 	return err
 }
 
+//==================.  unused
+
 // SendEmail sends an email using Gmail SMTP
 func (h *SmtpSender) SendVerificationCodeEmbeded(to string, code string) error {
 
@@ -105,30 +153,15 @@ func (h *SmtpSender) SendVerificationCodeEmbeded(to string, code string) error {
 		Code: code,
 		Name: "Mr",
 	}
-	return h.SendEmail(emailFields, verificationData)
+	return h.SendEmailTmpl(emailFields, verificationData)
 }
 
 // SendEmail sends an email using Gmail SMTP
-func (h *SmtpSender) SendVerificationCode(to string, code string) error {
-
-	f, err := templates.Embedded.Open("verification_code.html")
-	if err != nil {
-		panic(err)
-	}
-	verificationData := VerificationCodeData{
-		Code: code,
-		Name: "Mr",
-	}
-	body, err := ParseEmbededTemplate(f, verificationData)
+func (h *SmtpSender) SendEmailTmpl(fields email.EmailFields, templateStruct any) error {
+	// Parse the email template
+	body, err := email.ParseEmailTemplate(fields.HtmlPath, templateStruct)
 	if err != nil {
 		return err
 	}
-
-	emailFields := email.EmailFields{
-		To:      to,
-		From:    h.From,
-		Subject: "Verify Your Email",
-	}
-
-	return h.SendEmailT(emailFields, body)
+	return h.SendEmailT(fields, body)
 }

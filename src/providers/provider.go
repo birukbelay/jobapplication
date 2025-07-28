@@ -70,6 +70,7 @@ func (gs *IProviderS) Authorization(operationId consts.OperationId, needsAuth bo
 				return
 			}
 		}
+		//TODO: check for blacklisted session on redis
 
 		// Call the next middleware in the chain. This eventually calls the
 		// operation handler as well.

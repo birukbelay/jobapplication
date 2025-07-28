@@ -76,4 +76,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/birukbelay/gocmn => ../goCmn
+replace github.com/birukbelay/gocmn => ../goCmn

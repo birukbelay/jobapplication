@@ -1,13 +1,5 @@
 package auth
 
-// RegisterClientInput This is Used for creating and updating the user
-type RegisterClientInput struct {
-	FirstName string `json:"fName" binding:"required,min=2" `
-	LastName  string `json:"lName" `
-	Email     string `json:"email" binding:"required,email" gorm:"unique"`
-	Password  string `json:"password" binding:"required,min=6"`
-	Avatar    string `json:"avatar" `
-}
 
 // VerificationInput is for verifying registration email
 type VerificationInput struct {

@@ -34,7 +34,7 @@ const (
 
 func SetupAdminAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv *Service[models.Admin]) {
 	handler := NewAuthHandler(providerS, serv)
-	tags := []string{"admin_auth"}
+	tags := []string{"auth_admin"}
 	path := constant.ApiV1 + "/admin_auth"
 
 	huma.Register(humaRouter, huma.Operation{

@@ -11,7 +11,6 @@ import (
 	"github.com/projTemplate/goauth/src/providers"
 )
 
-
 const (
 	GetAdminProfile    = constant.OperationId("OwPr_1-GetAdminProfile")
 	UpdateAdminProfile = constant.OperationId("OwPr_2-UpdateAdminProfile")
@@ -27,11 +26,11 @@ const (
 )
 
 var AdminProfilePermissionsMap = map[constant.OperationId]models.OperationAccess{
-	GetAdminProfile:        {AllowedRoles: []string{enums.ADMIN.S(), enums.OWNER.S()}, Description: "Creating A User"},
-	UpdateAdminProfile:     {AllowedRoles: []string{enums.ADMIN.S(), enums.OWNER.S()}},
-	AdminChangePwd:         {AllowedRoles: []string{enums.ADMIN.S(), enums.OWNER.S()}},
-	AdminChangeEmailReq:    {AllowedRoles: []string{enums.ADMIN.S(), enums.OWNER.S()}},
-	AdminChangeEmailVerify: {AllowedRoles: []string{enums.ADMIN.S(), enums.OWNER.S()}},
+	GetAdminProfile:        {AllowedRoles: []string{enums.PLATFORM_ADMIN.S(), enums.OWNER.S()}, Description: "Creating A User"},
+	UpdateAdminProfile:     {AllowedRoles: []string{enums.PLATFORM_ADMIN.S(), enums.OWNER.S()}},
+	AdminChangePwd:         {AllowedRoles: []string{enums.PLATFORM_ADMIN.S(), enums.OWNER.S()}},
+	AdminChangeEmailReq:    {AllowedRoles: []string{enums.PLATFORM_ADMIN.S(), enums.OWNER.S()}},
+	AdminChangeEmailVerify: {AllowedRoles: []string{enums.PLATFORM_ADMIN.S(), enums.OWNER.S()}},
 }
 
 func SetAdminProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) {

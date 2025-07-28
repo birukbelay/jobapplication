@@ -9,12 +9,12 @@ import (
 	sql_db "github.com/birukbelay/gocmn/src/generic"
 	"github.com/danielgtaylor/huma/v2"
 
-	IConst "github.com/projTemplate/goauth/src/common"
+	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models"
 )
 
 func (uh *HProfileHandler[T]) GetMyProfile(ctx context.Context, _ *dtos.AuthParam) (*dtos.HumaResponse[dtos.GResp[T]], error) {
-	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
@@ -23,7 +23,7 @@ func (uh *HProfileHandler[T]) GetMyProfile(ctx context.Context, _ *dtos.AuthPara
 }
 
 func (uh *HProfileHandler[T]) UpdateMyProfile(ctx context.Context, filter *dtos.HumaReqBody[models.ProfileUpdateDto]) (*dtos.HumaResponse[dtos.GResp[T]], error) {
-	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
@@ -32,16 +32,16 @@ func (uh *HProfileHandler[T]) UpdateMyProfile(ctx context.Context, filter *dtos.
 }
 
 func (uh *HProfileHandler[T]) UpdateMyPassword(ctx context.Context, input *dtos.HumaReqBody[models.PasswordUpdateDto]) (*dtos.HumaResponse[dtos.GResp[T]], error) {
-	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
-	resp, err := uh.Service.ChangePassword(ctx, v.UserId, input.Body)
+	resp, err := uh.Service.ChangePassword(ctx, v.UserId, v.SessionId, input.Body)
 	return dtos.HumaReturnG(resp, err)
 }
 
 func (uh *HProfileHandler[T]) UpdateMyEmailReq(ctx context.Context, input *dtos.HumaReqBody[models.ChangeEmailReqDto]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
-	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
@@ -50,7 +50,7 @@ func (uh *HProfileHandler[T]) UpdateMyEmailReq(ctx context.Context, input *dtos.
 }
 
 func (uh *HProfileHandler[T]) VerifyMyChangeEmailReq(ctx context.Context, input *dtos.HumaReqBody[models.VerifyEmailDto]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
-	v, ok := ctx.Value(string(IConst.CtxClaims)).(crypto.CustomClaims)
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}

@@ -2,17 +2,32 @@
 
 ## general
 
+- [x] owner create company
+- [ ] admins approve company
+- [ ] admins create invite code
+- [ ] users signup and register
+- [ ] users join company via invite codes.
+
 ## authentication 2
 
 - [ ] deploy
 
 ## profile 2
 
-## company
+## Owners
 
 - Owners create a Company
-- Admins see list of created compaies
-- Admins approve companies
+- [x] Admins see list of created compaies
+- [x] Admins approve companies: when approved make the owner active
+
+## Admins
+
+- see list of all companies
+- approve companies
+- disable companies
+
+- see list of all owners,users
+- disable users,owners
 
 ## invitation
 

@@ -8,6 +8,7 @@ import (
 	"github.com/birukbelay/gocmn/src/dtos"
 
 	Icnst "github.com/projTemplate/goauth/src/common"
+	 "github.com/projTemplate/goauth/src/models"
 )
 
 func CreateCookie(Name, Value string, minutes int) http.Cookie {
@@ -23,7 +24,7 @@ func CreateCookie(Name, Value string, minutes int) http.Cookie {
 	}
 }
 
-func (ah *GinAuthHandler[T]) Register(ctx context.Context, inputs *dtos.HumaReqBody[RegisterClientInput]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
+func (ah *GinAuthHandler[T]) Register(ctx context.Context, inputs *dtos.HumaReqBody[models.RegisterClientInput]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
 	usr, err := ah.AdminAuthServ.RegisterCompanyOwner(ctx, inputs.Body)
 	return dtos.HumaReturnG(usr, err)
 }

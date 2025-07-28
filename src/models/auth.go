@@ -2,6 +2,14 @@ package models
 
 import "time"
 
+type RegisterClientInput struct {
+	FirstName string `json:"fName" binding:"required,min=2" `
+	LastName  string `json:"lName" `
+	Email     string `json:"email" binding:"required,email" gorm:"unique"`
+	Password  string `json:"password" binding:"required,min=6"`
+	Avatar    string `json:"avatar" `
+}
+
 // ProfileUpdateDto This is Used for creating and updating the user
 type ProfileUpdateDto struct {
 	FirstName string `json:"first_name,omitempty" minLength:"1"`

@@ -22,7 +22,7 @@ const (
 
 func SetupUserAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv *Service[models.User]) {
 	handler := NewAuthHandler(providerS, serv)
-	tags := []string{"user_auth"}
+	tags := []string{"auth_user"}
 	path := constant.ApiV1 + "/auth"
 
 	huma.Register(humaRouter, huma.Operation{

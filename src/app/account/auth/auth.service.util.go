@@ -7,7 +7,7 @@ import (
 	ICrypt "github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/dtos"
 	"github.com/birukbelay/gocmn/src/generic"
-	cmn "github.com/birukbelay/gocmn/src/logger"
+	"github.com/birukbelay/gocmn/src/logger"
 	"github.com/birukbelay/gocmn/src/util"
 	"gorm.io/gorm/clause"
 
@@ -52,20 +52,22 @@ func (aus Service[T]) UTIL_SendVerification(ctx context.Context, email, userId s
 		CodeHash:  codeHash,
 		Purpose:   purpose,
 		UserId:    userId,
-	}, []clause.Column{{Name: "user_id"}}, nil)
+		Email:     email,
+	}, []clause.Column{{Name: "user_id"}}, &generic.Opt{Debug: true})
 	if err != nil {
-		cmn.LogTrace("error crating", err)
+		logger.LogTrace("error crating", err)
 		return dtos.InternalErrMS[bool]("creating Error"), err
 	}
 	return dtos.SuccessS(true, verificationResp.RowsAffected), nil
 }
-//VerifyCode TODO: add reason of error, like code expires
+
+// VerifyCode TODO: add reason of error, like code expires
 func (aus Service[T]) VerifyCode(ctx context.Context, userId string, code string) bool {
 	codeModel, err := generic.DbGetOne[models.VerificationCode](aus.Provider.GormConn, ctx, models.VerificationCode{UserId: userId}, nil)
 	if err != nil {
 		return false
 	}
-	if codeModel.Body.ExpiresAt.Before(time.Now()) {
+	if codeModel.Body.ExpiresAt.After(time.Now()) {
 		return false
 	}
 	valid := ICrypt.BcryptPasswordsMatch(code, codeModel.Body.CodeHash)

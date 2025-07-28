@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	ICrypt "github.com/birukbelay/gocmn/src/crypto"
+	"github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/dtos"
 	"github.com/birukbelay/gocmn/src/generic"
 	"github.com/birukbelay/gocmn/src/logger"
@@ -18,6 +18,7 @@ import (
 	"github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/src/models/enums"
 	"github.com/projTemplate/goauth/src/providers"
+	"github.com/projTemplate/goauth/src/providers/db/redis"
 )
 
 type Service[T models.IntUsr] struct {
@@ -33,7 +34,7 @@ func NewAdminAuthServH[T models.IntUsr](conf *config.EnvConfig, genServ *provide
 }
 
 // RegisterCompanyOwner (acc-01) , [AccountStatus], set(pwd,)
-func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input RegisterClientInput) (dtos.GResp[bool], error) {
+func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input models.RegisterClientInput) (dtos.GResp[bool], error) {
 	//Check if the email already exists
 	usr, err := generic.DbGetOne[T](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Email}, nil)
 	//if the user already exists
@@ -53,12 +54,12 @@ func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input RegisterCl
 		return dtos.BadReqM[bool]("Decoding Input Error"), err
 	}
 
-	hash, err := ICrypt.BcryptCreateHash(input.Password)
+	hash, err := crypto.BcryptCreateHash(input.Password)
 	if err != nil {
 		return dtos.InternalErrMS[bool]("Hashing Error"), err
 	}
 	userModel.Password = hash
-	userModel.Role = enums.OWNER
+	userModel.Role = enums.UNVERIFIED_OWNER
 	userModel.AccountStatus = enums.AccountPendingVerification
 	userModel.Active = false
 
@@ -71,7 +72,7 @@ func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input RegisterCl
 	return aus.UTIL_SendVerification(ctx, input.Email, models.GetID(user.Body), models.SignupVerification)
 }
 
-// RegisterCompanyOwner (acc-01), [id]x
+// VerifyCompanyUser (acc-01), [id]x
 func (aus Service[T]) VerifyCompanyUser(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
 	//Check if the email already exists
 	usr, err := generic.DbGetOne[T](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Info, AccountStatus: enums.AccountPendingVerification}, nil)
@@ -101,20 +102,15 @@ func (aus Service[T]) Login(ctx context.Context, input LoginData) (dtos.GResp[To
 	if err != nil || usr.RowsAffected < 1 {
 		return dtos.BadReqC[TokenResponse](resp_const.EmailOrPassword), resp_const.EmailOrPasswordErr
 	}
-	userCompany := ""
-	//if usr.Body.Role == enums.OWNER {
-	//	userCompany = usr.Body.OwnedCompany.ID
-	//} else if usr.Body.Role == enums.USER {
-	//	userCompany = usr.Body.EmployerCompany.ID
-	//}
+
 	//2. compare the password hash
-	valid := ICrypt.BcryptPasswordsMatch(input.Password, usr.Body.GetPwd())
+	valid := crypto.BcryptPasswordsMatch(input.Password, usr.Body.GetPwd())
 	if !valid {
 		return dtos.BadReqC[TokenResponse](resp_const.EmailOrPassword), resp_const.EmailOrPasswordErr
 	}
 
 	sessionID := ulid.Make().String()
-	tokens, err := aus.UTIL_MakeSession(ctx, sessionID, string(usr.Body.GetRole()), models.GetID(usr.Body), userCompany)
+	tokens, err := aus.UTIL_MakeSession(ctx, sessionID, string(usr.Body.GetRole()), models.GetID(usr.Body), usr.Body.GetCompanyId())
 	if err != nil {
 		return dtos.InternalErrMS[TokenResponse](err.Error()), err
 	}
@@ -129,7 +125,7 @@ func (aus Service[T]) Login(ctx context.Context, input LoginData) (dtos.GResp[To
 // ResetToken (acc-04): FIXME to be update with redis: [Role, id]
 func (aus Service[T]) ResetToken(ctx context.Context, refreshToken string) (dtos.GResp[TokenResponse], error) {
 	//1. validate the refresh token
-	claims, ok, err := ICrypt.Valid(refreshToken, aus.Config.RefreshSecret)
+	claims, ok, err := crypto.Valid(refreshToken, aus.Config.RefreshSecret)
 	if !ok || (err != nil) {
 		return dtos.BadReqC[TokenResponse](resp_const.InvalidToken), resp_const.InvalidTokenError
 	}
@@ -145,7 +141,7 @@ func (aus Service[T]) ResetToken(ctx context.Context, refreshToken string) (dtos
 	}
 
 	// 4. validate the refresh token is the same
-	valid := ICrypt.ArgonPasswordsMatch(refreshToken, session.Body.HashedRefresh)
+	valid := crypto.ArgonPasswordsMatch(refreshToken, session.Body.HashedRefresh)
 	if !valid {
 		return dtos.BadReqC[TokenResponse](resp_const.TokenDontMatch), resp_const.TokenDontMatchError
 	}
@@ -166,7 +162,7 @@ func (aus Service[T]) ResetToken(ctx context.Context, refreshToken string) (dtos
 func (aus Service[T]) Logout(ctx context.Context, refreshToken string) (dtos.GResp[bool], error) {
 
 	//1. the jwt token
-	claims, ok, err := ICrypt.Valid(refreshToken, aus.Config.RefreshSecret)
+	claims, ok, err := crypto.Valid(refreshToken, aus.Config.RefreshSecret)
 	if !ok || (err != nil) {
 		return dtos.BadReqC[bool](resp_const.InvalidToken), resp_const.InvalidTokenError
 	}
@@ -176,7 +172,7 @@ func (aus Service[T]) Logout(ctx context.Context, refreshToken string) (dtos.GRe
 		return dtos.BadReqC[bool](resp_const.DataNotFound), resp_const.UserNotFoundError
 	}
 	//3. verify the refresh token is the same
-	valid := ICrypt.ArgonPasswordsMatch(refreshToken, session.Body.HashedRefresh)
+	valid := crypto.ArgonPasswordsMatch(refreshToken, session.Body.HashedRefresh)
 	if !valid {
 		return dtos.BadReqC[bool](resp_const.TokenDontMatch), resp_const.TokenDontMatchError
 	}
@@ -185,6 +181,7 @@ func (aus Service[T]) Logout(ctx context.Context, refreshToken string) (dtos.GRe
 	if eror != nil {
 		return dtos.InternalErrMS[bool](eror.Error()), eror
 	}
+	err = redis.BlacklistSession(aus.Provider.KeyValServ, ctx, session.Body.ID)
 	return dtos.SuccessS(true, resp.RowsAffected), nil
 }
 
@@ -200,28 +197,59 @@ func (aus Service[T]) ForgotPwd(ctx context.Context, input VerifyReqInput) (dtos
 
 // ResetPwd [ID]
 func (aus Service[T]) ResetPwd(ctx context.Context, input PwdResetInput) (dtos.GResp[bool], error) {
+	tx := aus.Provider.GormConn.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	if err := tx.Error; err != nil {
+		return dtos.InternalErrMS[bool](err.Error()), err
+	}
+
 	//1. Get the user
-	usr, err := generic.DbGetOne[T](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Info}, nil)
+	usr, err := generic.DbGetOne[T](tx, ctx, models.UserFilter{Email: input.Info}, nil)
 	if err != nil {
+		tx.Rollback()
 		return dtos.BadReqC[bool](resp_const.InfoOrCode), resp_const.InfoOrCodeErr
 	}
 	//2. Validate the code
 	codeValid := aus.VerifyCode(ctx, models.GetID(usr.Body), input.Code)
 	if !codeValid {
+		tx.Rollback()
 		return dtos.BadReqC[bool](resp_const.InfoOrCode), resp_const.InfoOrCodeErr
 	}
 	//3. hash the new Password
-	hash, err := ICrypt.BcryptCreateHash(input.NewPassword)
+	hash, err := crypto.BcryptCreateHash(input.NewPassword)
 	if err != nil {
+		tx.Rollback()
 		return dtos.InternalErrMS[bool]("Hashing Error"), err
 	}
 	//4. Update the users passowrd
-	user, err := generic.DbUpdateByFilter[T](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Info}, models.UserDto{Password: hash}, nil)
+	user, err := generic.DbUpdateByFilter[T](tx, ctx, models.UserFilter{Email: input.Info}, models.UserDto{Password: hash}, nil)
 	if err != nil {
-		cmn.LogTrace("error crating", err)
+		tx.Rollback()
+		// cmn.LogTrace("error crating", err)
 		return dtos.InternalErrMS[bool]("creating Error"), err
 	}
-	//TODO: invalidate the code
+	//5: invalidate the code
+	_, err = generic.DbDeleteByFilter[models.VerificationCode](tx, ctx, models.VerificationCode{UserId: models.GetID(usr.Body)}, nil)
+	if err != nil {
+		tx.Rollback()
+		return dtos.InternalErrMS[bool]("Deleting users Codes errors"), err
+	}
+	commit := tx.Commit()
+	if commit.Error != nil {
+		return dtos.InternalErrMS[bool](commit.Error.Error()), commit.Error
+	}
+	//6. black list all the users sessions
+	sessions, err := generic.DbFetchManyWithOffset[models.Session](aus.Provider.GormConn, ctx, models.Session{UserId: models.GetID(usr.Body)}, dtos.PaginationInput{Limit: 10000}, nil)
+	if err != nil {
+
+	}
+	for _, val := range sessions.Body {
+		err = redis.BlacklistSession(aus.Provider.KeyValServ, ctx, val.SessionId)
+	}
 
 	return dtos.SuccessS(true, user.RowsAffected), nil
 }
