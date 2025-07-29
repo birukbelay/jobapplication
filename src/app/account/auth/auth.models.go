@@ -1,6 +1,5 @@
 package auth
 
-
 // VerificationInput is for verifying registration email
 type VerificationInput struct {
 	Info string `json:"info" validate:"required"`
@@ -11,7 +10,7 @@ type VerificationInput struct {
 type LoginData struct {
 	LoginInfo string ` json:"info" binding:"required"`
 	Password  string ` json:"password" binding:"required"`
-	InfoType  string `json:"info_type,omitempty" `
+	InfoType  string `json:"-" `
 }
 
 type RefreshTokenInput struct {

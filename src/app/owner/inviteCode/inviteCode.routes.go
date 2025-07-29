@@ -35,20 +35,22 @@ func NewInviteCodeHandler(serv *Service) *HumaInviteCodeHandler {
 }
 
 const (
-	CreateInviteCode        = consts.OperationId("Ow_Invt-1-CreateInviteCode")
-	GetOneInviteCode        = consts.OperationId("Ow_Invt-2-GetOneInviteCode")
-	UpdateOneInviteCode     = consts.OperationId("Ow_Invt-3-UpdateOneInviteCode")
-	CreateAndSendInviteCode = consts.OperationId("Ow_Invt-4-UpdateOneInviteCode")
-	JoinViaInviteCode       = consts.OperationId("Ow_Invt-5-UpdateOneInviteCode")
+	OffsetPaginatedInviteCodes = consts.OperationId("Ow_Invt-1-OffsetPaginatedInviteCodes")
+	CreateInviteCode           = consts.OperationId("Ow_Invt-2-CreateInviteCode")
+	GetOneInviteCode           = consts.OperationId("Ow_Invt-3-GetOneInviteCode")
+	UpdateOneInviteCode        = consts.OperationId("Ow_Invt-4-UpdateOneInviteCode")
+	CreateAndSendInviteCode    = consts.OperationId("Ow_Invt-5-CreateAndSendInviteCode")
+	JoinViaInviteCode          = consts.OperationId("Ow_Invt-6-JoinViaInviteCode")
 )
 
 var OperationMap = map[consts.OperationId]models.OperationAccess{
 
-	CreateInviteCode:        {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
-	GetOneInviteCode:        {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
-	UpdateOneInviteCode:     {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
-	CreateAndSendInviteCode: {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
-	JoinViaInviteCode:       {AllowedRoles: []string{enums.USER.S()}, Description: ".."},
+	OffsetPaginatedInviteCodes: {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
+	CreateInviteCode:           {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
+	GetOneInviteCode:           {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
+	UpdateOneInviteCode:        {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
+	CreateAndSendInviteCode:    {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
+	JoinViaInviteCode:          {AllowedRoles: []string{}, Description: ".."},
 }
 
 func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, serv *Service) {
@@ -58,11 +60,20 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 	path := consts.ApiV1 + "/invite_code"
 	pathId := consts.ApiV1 + "/invite_code/{id}"
 	huma.Register(humaRouter, huma.Operation{
+		OperationID: OffsetPaginatedInviteCodes.Str(),
+		Description: "list a companies invite codes",
+		Method:      http.MethodGet,
+		Path:        path,
+		Tags:        tags,
+		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedInviteCodes,  OperationMap[OffsetPaginatedInviteCodes].AllowedRoles,nil)},
+	}, genericController.OffsetPaginated,
+	)
+	huma.Register(humaRouter, huma.Operation{
 		OperationID: CreateInviteCode.Str(),
 		Method:      http.MethodPost,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateInviteCode, true, OperationMap[CreateInviteCode].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateInviteCode,  OperationMap[CreateInviteCode].AllowedRoles,nil)},
 	}, genericController.CreateInviteCode,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -70,7 +81,7 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 		Method:      http.MethodGet,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneInviteCode, true, OperationMap[GetOneInviteCode].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneInviteCode,  OperationMap[GetOneInviteCode].AllowedRoles,nil)},
 	}, genericController.GetOneInviteCode,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -78,7 +89,7 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 		Method:      http.MethodPatch,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateOneInviteCode, true, OperationMap[UpdateOneInviteCode].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateOneInviteCode,  OperationMap[UpdateOneInviteCode].AllowedRoles,nil)},
 	}, genericController.UpdateOneInviteCode,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -86,7 +97,7 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 		Method:      http.MethodPost,
 		Path:        path + "/send_one",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateAndSendInviteCode, true, OperationMap[CreateAndSendInviteCode].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateAndSendInviteCode,  OperationMap[CreateAndSendInviteCode].AllowedRoles,nil)},
 	}, genericController.CreateAndSendInviteCode,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -94,7 +105,7 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 		Method:      http.MethodPost,
 		Path:        path + "/join",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(JoinViaInviteCode, true, OperationMap[JoinViaInviteCode].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(JoinViaInviteCode,  OperationMap[JoinViaInviteCode].AllowedRoles,nil)},
 	}, genericController.JoinViaInviteCode,
 	)
 

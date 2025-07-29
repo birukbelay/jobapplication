@@ -44,7 +44,7 @@ func SetAdminProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) 
 		Method:      http.MethodGet,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(GetAdminProfile, true, ProfilePermissionsMap[GetAdminProfile].AllowedRoles...)},
+		Middlewares: huma.Middlewares{provServ.Authorization(GetAdminProfile, ProfilePermissionsMap[GetAdminProfile].AllowedRoles, nil)},
 	}, adminHandler.GetMyProfile)
 
 	huma.Register(humaRouter, huma.Operation{
@@ -52,7 +52,7 @@ func SetAdminProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) 
 		Method:      http.MethodPatch,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(UpdateAdminProfile, true, ProfilePermissionsMap[UpdateAdminProfile].AllowedRoles...)},
+		Middlewares: huma.Middlewares{provServ.Authorization(UpdateAdminProfile, ProfilePermissionsMap[UpdateAdminProfile].AllowedRoles, nil)},
 	}, adminHandler.UpdateMyProfile)
 
 	huma.Register(humaRouter, huma.Operation{
@@ -60,7 +60,7 @@ func SetAdminProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) 
 		Method:      http.MethodPost,
 		Path:        path + "/change_pwd",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(AdminChangePwd, true, ProfilePermissionsMap[AdminChangePwd].AllowedRoles...)},
+		Middlewares: huma.Middlewares{provServ.Authorization(AdminChangePwd, ProfilePermissionsMap[AdminChangePwd].AllowedRoles, nil)},
 	}, adminHandler.UpdateMyPassword)
 
 	huma.Register(humaRouter, huma.Operation{
@@ -68,7 +68,7 @@ func SetAdminProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) 
 		Method:      http.MethodPost,
 		Path:        path + "/change_email",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(AdminChangeEmailReq, true, ProfilePermissionsMap[AdminChangeEmailReq].AllowedRoles...)},
+		Middlewares: huma.Middlewares{provServ.Authorization(AdminChangeEmailReq, ProfilePermissionsMap[AdminChangeEmailReq].AllowedRoles, nil)},
 	}, adminHandler.UpdateMyEmailReq)
 
 	huma.Register(humaRouter, huma.Operation{
@@ -76,7 +76,7 @@ func SetAdminProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) 
 		Method:      http.MethodPost,
 		Path:        path + "/verify_change_email",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(AdminChangeEmailVerify, true, ProfilePermissionsMap[AdminChangeEmailVerify].AllowedRoles...)},
+		Middlewares: huma.Middlewares{provServ.Authorization(AdminChangeEmailVerify, ProfilePermissionsMap[AdminChangeEmailVerify].AllowedRoles, nil)},
 	}, adminHandler.VerifyMyChangeEmailReq)
 
 	// ===============  Depricated

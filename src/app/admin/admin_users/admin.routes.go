@@ -45,7 +45,7 @@ func SetupManageAdminUsersRoutes(humaRouter huma.API, cmnServ *providers.IProvid
 		Method:      http.MethodGet,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedAdmins, true, OperationMap[OffsetPaginatedAdmins].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedAdmins, OperationMap[OffsetPaginatedAdmins].AllowedRoles, nil)},
 	}, genericController.OffsetPaginated,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -54,7 +54,7 @@ func SetupManageAdminUsersRoutes(humaRouter huma.API, cmnServ *providers.IProvid
 		Method:      http.MethodGet,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneAdminById, true, OperationMap[GetOneAdminById].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneAdminById, OperationMap[GetOneAdminById].AllowedRoles, nil)},
 	}, genericController.GHandler.GetOneById,
 	)
 
@@ -65,7 +65,7 @@ func SetupManageAdminUsersRoutes(humaRouter huma.API, cmnServ *providers.IProvid
 		Method:      http.MethodPatch,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateAdmin, true, OperationMap[UpdateAdmin].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateAdmin, OperationMap[UpdateAdmin].AllowedRoles, nil)},
 	}, genericController.GHandler.UpdateOneById,
 	)
 }

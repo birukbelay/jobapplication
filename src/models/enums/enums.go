@@ -27,10 +27,10 @@ func (r Role) Value() (driver.Value, error) {
 }
 
 const (
-	PLATFORM_ADMIN   = Role("PLATFORM_ADMIN")
-	USER             = Role("USER")
-	OWNER            = Role("OWNER")
-	UNVERIFIED_OWNER = Role("UNVERIFIED_OWNER")
+	PLATFORM_ADMIN  = Role("PLATFORM_ADMIN")
+	USER            = Role("USER")
+	OWNER           = Role("OWNER")
+	UNVERIFIED_USER = Role("UNVERIFIED_USER")
 )
 
 func (r Role) S() string {

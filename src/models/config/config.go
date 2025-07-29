@@ -27,6 +27,7 @@ type CloudinaryConfig struct {
 	CloudinaryAPISecret string `koanf:"CLOUDINARY_API_SECRET"`
 	CloudinaryFolder    string `koanf:"CLOUDINARY_FOLDER"`
 }
+
 type SqlDbConfig struct {
 	DbName   string `koanf:"POSTGRES_DB"`
 	Username string `koanf:"POSTGRES_USER"`

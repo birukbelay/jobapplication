@@ -14,6 +14,23 @@ import (
 	"github.com/projTemplate/goauth/src/models"
 )
 
+func (uh *HumaInviteCodeHandler) OffsetPaginated(ctx context.Context, filter *struct {
+	models.InviteCodeFilter
+	models.InviteCodeQuery
+	dtos.PaginationInput
+}) (*dtos.HumaResponse[dtos.PResp[[]models.InviteCode]], error) {
+	sort, selectedFields := filter.InviteCodeQuery.GetQueries()
+	filter.PaginationInput.Select = selectedFields
+	filter.PaginationInput.SortBy = sort
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
+	if !ok {
+		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
+	}
+	filter.CompanyID = v.CompanyId
+	resp, err := generic.DbFetchManyWithOffset[models.InviteCode](uh.GHandler.GormConn, ctx, filter.InviteCodeFilter, filter.PaginationInput, nil)
+	return dtos.PHumaReturn(resp, err)
+}
+
 func (uh *HumaInviteCodeHandler) CreateInviteCode(ctx context.Context, dto *dtos.HumaReqBody[models.InviteCodeDto]) (*dtos.HumaResponse[dtos.GResp[models.InviteCode]], error) {
 	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
 	if !ok {

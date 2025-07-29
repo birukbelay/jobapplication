@@ -51,17 +51,18 @@ type InviteCode struct {
 
 	Company Company `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
 	// Users   []User  `gorm:"foreignKey:CompanyID"`
+	UsageCount int `json:"usate_count,omitempty" `
 }
 type InviteCodeDto struct {
-	Name       string     `json:"name,omitempty" `
-	CompanyID  string     `json:"company_id" gorm:"not null;index"`
-	Code       string     `json:"code" gorm:"uniqueindex"`
-	UserRole   string     `json:"user_role" `
-	ExpiresAt  *time.Time `json:"expires_at,omitempty" `
-	UsageCount int        `json:"usate_count,omitempty" `
-	MaxUsage   *int       `json:"max_usage,omitempty" `
-	UserInfo   *string    `json:"user_info,omitempty" `
-	Active     bool       `json:"active,omitempty" `
+	Name      string     `json:"name,omitempty" `
+	CompanyID string     `json:"company_id,omitempty" gorm:"not null;index"`
+	Code      string     `json:"code,omitempty" gorm:"uniqueindex"`
+	UserRole  string     `json:"user_role,omitempty" `
+	ExpiresAt *time.Time `json:"expires_at,omitempty" `
+
+	MaxUsage *int    `json:"max_usage,omitempty" `
+	UserInfo *string `json:"user_info,omitempty" `
+	Active   bool    `json:"active,omitempty" `
 }
 type InviteCodeUpdateDto struct {
 	Name      string     `json:"name,omitempty" `
@@ -71,20 +72,20 @@ type InviteCodeUpdateDto struct {
 	Active   bool `json:"active,omitempty" `
 }
 type InviteCodeFilter struct {
-	ID         string  `query:"id"`
-	Name       string  `query:"name" `
-	CompanyID  string  `query:"company_id" `
-	Code       string  `query:"code" `
-	UserRole   string  `query:"code" `
-	UsageCount string  `query:"code" `
-	MaxUsage   *int    `query:"max_usage" `
-	UserInfo   *string `query:"user_info" `
-	Active     bool    `query:"active" `
+	ID         string `query:"id"`
+	Name       string `query:"name" `
+	CompanyID  string `query:"company_id" `
+	Code       string `query:"code" `
+	UserRole   string `query:"code" `
+	UsageCount string `query:"code" `
+	MaxUsage   int    `query:"max_usage" `
+	UserInfo   string `query:"user_info" `
+	Active     bool   `query:"active" `
 }
 type InviteCodeQuery struct {
-	ExpiresAt      *time.Time `query:"expires_at" `
-	SelectedFields []string   `query:"selected_fields" enum:"company_id,expires_at,user_role,usage_count,max_usage,user_info, id,created_at,updated_at"`
-	Sort           string     `query:"sort" enum:"company_id,usage_count,max_usage,expires_at,created_at,updated_at,id"`
+	ExpiresAt      time.Time `query:"expires_at" `
+	SelectedFields []string  `query:"selected_fields" enum:"company_id,expires_at,user_role,usage_count,max_usage,user_info, id,created_at,updated_at"`
+	Sort           string    `query:"sort" enum:"company_id,usage_count,max_usage,expires_at,created_at,updated_at,id"`
 }
 
 func (q InviteCodeQuery) GetQueries() (string, []string) {

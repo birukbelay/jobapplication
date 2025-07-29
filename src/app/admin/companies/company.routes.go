@@ -62,7 +62,7 @@ func SetupManageCompaniesRoutes(humaRouter huma.API, cmnServ *providers.IProvide
 		Method:      http.MethodGet,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedCompanies, true, OperationMap[OffsetPaginatedCompanies].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedCompanies,  OperationMap[OffsetPaginatedCompanies].AllowedRoles,nil)},
 	}, genericController.OffsetPaginated,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -70,7 +70,7 @@ func SetupManageCompaniesRoutes(humaRouter huma.API, cmnServ *providers.IProvide
 		Method:      http.MethodGet,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneCompanyById, true, OperationMap[GetOneCompanyById].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneCompanyById,  OperationMap[GetOneCompanyById].AllowedRoles,nil)},
 	}, genericController.GHandler.GetOneById,
 	)
 
@@ -80,7 +80,7 @@ func SetupManageCompaniesRoutes(humaRouter huma.API, cmnServ *providers.IProvide
 		Method:      http.MethodPatch,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateCompany, true, OperationMap[UpdateCompany].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateCompany,  OperationMap[UpdateCompany].AllowedRoles,nil)},
 	}, genericController.GHandler.UpdateOneById,
 	)
 
@@ -90,7 +90,7 @@ func SetupManageCompaniesRoutes(humaRouter huma.API, cmnServ *providers.IProvide
 		Method:      http.MethodPatch,
 		Path:        pathId + "/approve",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(ApproveCompany, true, OperationMap[UpdateCompany].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(ApproveCompany,  OperationMap[UpdateCompany].AllowedRoles,nil)},
 	}, genericController.ApproveCompany,
 	)
 }

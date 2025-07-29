@@ -27,14 +27,33 @@ type IProviderS struct {
 	//will have upload services, email services
 }
 
+func NewProvider(conn *gorm.DB, env *config.EnvConfig, emailSender email.EmailSender, verificationSender email.VerificationSender, keyValServ KeyValServ) *IProviderS {
+	return &IProviderS{
+		GormConn:               conn,
+		EnvConf:                env,
+		EmailSender:            emailSender,
+		VerificationCodeSender: verificationSender,
+		KeyValServ:             keyValServ,
+	}
+}
+
+type AuthOpts struct {
+	SkipAuth   bool
+	SetCompany bool
+	SetUser    bool
+}
+
 // Authorization needs database service as well as configs
-func (gs *IProviderS) Authorization(operationId consts.OperationId, needsAuth bool, allowedRoles ...string) func(ctx huma.Context, next func(huma.Context)) {
+func (gs *IProviderS) Authorization(operationId consts.OperationId, allowedRoles []string, opt *AuthOpts) func(ctx huma.Context, next func(huma.Context)) {
 
 	return func(ctx huma.Context, next func(huma.Context)) {
-		if !needsAuth {
-			next(ctx)
-			return
+		if opt != nil {
+			if opt.SkipAuth {
+				next(ctx)
+				return
+			}
 		}
+
 		//ctx.SetHeader("My-Custom-Header", "Hello, world!")
 		token := ctx.Header("Authorization")
 		if token == "" {
@@ -61,7 +80,9 @@ func (gs *IProviderS) Authorization(operationId consts.OperationId, needsAuth bo
 
 		//cmn.LogTrace("EnvConf:", gs.EnvConf.AccessSecret)
 
-		ctx = huma.WithValue(ctx, string(common.CtxClaims), claims)
+		ctx = huma.WithValue(ctx, common.CtxClaims.Str(), claims)
+		ctx = huma.WithValue(ctx, common.CTXCompany_ID.Str(), claims.CompanyId)
+		ctx = huma.WithValue(ctx, common.CTXUser_ID.Str(), claims.CompanyId)
 		//=====================   Authorization ===================
 		if len(allowedRoles) > 0 {
 			if !util.ElementExists(claims.Role, allowedRoles...) {

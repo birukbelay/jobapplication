@@ -92,7 +92,7 @@ func (aus Service) JoinViaInviteCode(ctx context.Context, userId, code string) (
 		tx.Rollback()
 		return dtos.InternalErrMS[bool]("creating Error"), err
 	}
-	_, err = generic.DbUpdateOneById[models.InviteCode](tx, ctx, userId, models.InviteCodeDto{UsageCount: inviteCode.Body.UsageCount + 1}, nil)
+	_, err = generic.DbUpdateOneById[models.InviteCode](tx, ctx, inviteCode.Body.ID, models.InviteCode{UsageCount: inviteCode.Body.UsageCount + 1}, &generic.Opt{Debug: true})
 	if err != nil {
 		tx.Rollback()
 		return dtos.InternalErrMS[bool]("creating Error"), err

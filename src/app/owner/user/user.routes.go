@@ -7,6 +7,7 @@ import (
 	"github.com/birukbelay/gocmn/src/generic"
 	"github.com/danielgtaylor/huma/v2"
 
+	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models"
 	"github.com/projTemplate/goauth/src/models/enums"
 	"github.com/projTemplate/goauth/src/providers"
@@ -31,17 +32,19 @@ type HumaUserHandler struct {
 
 // NewLogTraceHandler creates a content handler from IContentService & Generic Gorm Service
 func NewUserHandler(serv *Service) *HumaUserHandler {
-	return &HumaUserHandler{Service: serv, GHandler: generic.NewGenericController[models.User, models.UserDto, models.UserUpdateDto, models.UserFilter, models.UserQuery](serv.ProvServ.GormConn)}
+	return &HumaUserHandler{Service: serv, GHandler: generic.NewGenericAuthController[models.User, models.UserDto, models.UserUpdateDto, models.UserFilter, models.UserQuery](serv.ProvServ.GormConn, "company_id", common.CTXCompany_ID.Str())}
 }
 
 const (
-	CreateUser    = consts.OperationId("Ow_Usr_1-CreateUser")
+	MyUsers       = consts.OperationId("Ow_Usr-4-MyUsers")
+	CreateUser    = consts.OperationId("Ow_Usr-1-CreateUser")
 	GetOneUser    = consts.OperationId("Ow_Usr_2-GetOneUser")
 	UpdateOneUser = consts.OperationId("Ow_Usr_3-UpdateOneUser")
 )
 
 var OperationMap = map[consts.OperationId]models.OperationAccess{
 
+	MyUsers:       {AllowedRoles: []string{enums.OWNER.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
 	CreateUser:    {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
 	GetOneUser:    {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
 	UpdateOneUser: {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
@@ -54,11 +57,20 @@ func SetupCompanyUserRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 	path := consts.ApiV1 + "/my_users"
 	pathId := consts.ApiV1 + "/my_users/{id}"
 	huma.Register(humaRouter, huma.Operation{
+		OperationID: MyUsers.Str(),
+		Description: "admins are platform admins and company owners",
+		Method:      http.MethodGet,
+		Path:        path,
+		Tags:        tags,
+		Middlewares: huma.Middlewares{cmnServ.Authorization(MyUsers, OperationMap[MyUsers].AllowedRoles, nil)},
+	}, genericController.OffsetPaginated,
+	)
+	huma.Register(humaRouter, huma.Operation{
 		OperationID: CreateUser.Str(),
 		Method:      http.MethodPost,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateUser, true, OperationMap[CreateUser].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateUser, OperationMap[CreateUser].AllowedRoles, nil)},
 	}, genericController.CreateUser,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -66,8 +78,8 @@ func SetupCompanyUserRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 		Method:      http.MethodGet,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneUser, true, OperationMap[GetOneUser].AllowedRoles...)},
-	}, genericController.GetOneUser,
+		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneUser, OperationMap[GetOneUser].AllowedRoles, nil)},
+	}, genericController.GHandler.AuthGetOneById,
 	)
 	//------------- used to approve companies
 	huma.Register(humaRouter, huma.Operation{
@@ -75,7 +87,7 @@ func SetupCompanyUserRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 		Method:      http.MethodPatch,
 		Path:        pathId,
 		Tags:        tags,
-		// Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateMyUser, true, OperationMap[UpdateMyUser].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateOneUser, OperationMap[UpdateOneUser].AllowedRoles, nil)},
 	}, genericController.UpdateOneUser,
 	)
 

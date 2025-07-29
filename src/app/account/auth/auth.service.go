@@ -59,7 +59,7 @@ func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input models.Reg
 		return dtos.InternalErrMS[bool]("Hashing Error"), err
 	}
 	userModel.Password = hash
-	userModel.Role = enums.UNVERIFIED_OWNER
+	userModel.Role = enums.UNVERIFIED_USER
 	userModel.AccountStatus = enums.AccountPendingVerification
 	userModel.Active = false
 

@@ -10,6 +10,7 @@ import (
 	"github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/src/models/migration"
 	Idb "github.com/projTemplate/goauth/src/providers"
+	"github.com/projTemplate/goauth/src/providers/db/redis"
 	sql_db "github.com/projTemplate/goauth/src/providers/db/sql_db"
 	email "github.com/projTemplate/goauth/src/providers/email/smtp"
 	IGin "github.com/projTemplate/goauth/src/server"
@@ -28,12 +29,14 @@ func main() {
 	conf := cmnConf.LoadConfigT[config.EnvConfig]()
 	Db, _ := sql_db.NewSqlDb(&conf.SqlDbConfig)
 	migration.MigrateDb2(Db)
-	// migration.MigrateDb2(Db)
+	redis, err := redis.NewRedis(&conf.KeyValConfig)
+	
+
 	//Creating upload service
 	//fileServ := diskUpload.NewDidkUploader(conf)
 	// cloudinaryServ := cloudinaryServ2.NewCloudinaryUploader(conf)
-	// providerService := providers.NewProviderServ(Db, conf, cloudinaryServ)
 	emailSender := email.NewSmtp(conf.SmtpHost, conf.SmtpPort, conf.SmtpPwd, conf.SmtpUsername)
-	ginApp := IGin.CreateFiber(Idb.IProviderS{GormConn: Db, EnvConf: conf, VerificationCodeSender: emailSender, EmailSender: emailSender}, conf)
+	provider := Idb.NewProvider(Db, conf, emailSender, emailSender, redis)
+	ginApp := IGin.CreateFiber(provider, conf)
 	_ = ginApp.Listen()
 }

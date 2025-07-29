@@ -22,10 +22,10 @@ func (uh *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 	models.UserFilter
 	models.UserQuery
 	dtos.PaginationInput
-}) (*dtos.HumaResponse[dtos.PResp[[]models.Company]], error) {
+}) (*dtos.HumaResponse[dtos.PResp[[]models.Admin]], error) {
 	sort, selectedFields := filter.UserQuery.GetQueries()
 	filter.PaginationInput.Select = selectedFields
 	filter.PaginationInput.SortBy = sort
-	resp, err := generic.DbFetchManyWithOffset[models.Company](uh.GHandler.GormConn, ctx, filter.UserFilter, filter.PaginationInput, nil)
+	resp, err := generic.DbFetchManyWithOffset[models.Admin](uh.GHandler.GormConn, ctx, filter.UserFilter, filter.PaginationInput, nil)
 	return dtos.PHumaReturn(resp, err)
 }

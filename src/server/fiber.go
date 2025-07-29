@@ -28,7 +28,7 @@ type FiberServer struct {
 	EnvConf *conf.EnvConfig
 }
 
-func CreateFiber(dbs providers.IProviderS, conf *conf.EnvConfig) *FiberServer {
+func CreateFiber(dbs *providers.IProviderS, conf *conf.EnvConfig) *FiberServer {
 
 	app := fiber.New()
 
@@ -50,7 +50,7 @@ func CreateFiber(dbs providers.IProviderS, conf *conf.EnvConfig) *FiberServer {
 	app.Get("/docs", ServFiberDock)
 	// v1 := app.Group("/api/v1")
 
-	serv.SetHumaCoreRoutes(humaRouter, &dbs)
+	serv.SetHumaCoreRoutes(humaRouter, dbs)
 	for _, x := range app.GetRoutes() {
 		fmt.Printf("=> %s:%s\n", x.Method, x.Path)
 	}

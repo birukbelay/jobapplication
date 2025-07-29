@@ -42,8 +42,8 @@ const (
 
 var OperationMap = map[consts.OperationId]models.OperationAccess{
 
-	CreateCompany:   {AllowedRoles: []string{enums.UNVERIFIED_OWNER.S()}, Description: ".."},
-	GetMyCompany:    {AllowedRoles: []string{enums.OWNER.S(), enums.UNVERIFIED_OWNER.S()}, Description: ".."},
+	CreateCompany:   {AllowedRoles: []string{enums.UNVERIFIED_USER.S()}, Description: ".."},
+	GetMyCompany:    {AllowedRoles: []string{enums.OWNER.S(), enums.UNVERIFIED_USER.S()}, Description: ".."},
 	UpdateMyCompany: {AllowedRoles: []string{enums.OWNER.S()}, Description: ".."},
 }
 
@@ -58,7 +58,7 @@ func SetupOwnerCompanyRoutes(humaRouter huma.API, cmnServ *providers.IProviderS,
 		Method:      http.MethodPost,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateCompany, true, OperationMap[CreateCompany].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateCompany,  OperationMap[CreateCompany].AllowedRoles,nil)},
 	}, genericController.CreateCompany,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -66,7 +66,7 @@ func SetupOwnerCompanyRoutes(humaRouter huma.API, cmnServ *providers.IProviderS,
 		Method:      http.MethodGet,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(GetMyCompany, true, OperationMap[GetMyCompany].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(GetMyCompany,  OperationMap[GetMyCompany].AllowedRoles,nil)},
 	}, genericController.GetMyCompany,
 	)
 	//------------- used to approve companies
@@ -75,7 +75,7 @@ func SetupOwnerCompanyRoutes(humaRouter huma.API, cmnServ *providers.IProviderS,
 		Method:      http.MethodPatch,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateMyCompany, true, OperationMap[UpdateMyCompany].AllowedRoles...)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateMyCompany,  OperationMap[UpdateMyCompany].AllowedRoles,nil)},
 	}, genericController.UpdateMyCompany,
 	)
 

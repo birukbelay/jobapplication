@@ -7,7 +7,6 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/projTemplate/goauth/src/models"
-	"github.com/projTemplate/goauth/src/models/enums"
 	"github.com/projTemplate/goauth/src/providers"
 )
 
@@ -31,9 +30,9 @@ const (
 )
 
 var ProfilePermissionsMap = map[consts.OperationId]models.OperationAccess{
-	GetMyProfile:    {AllowedRoles: []string{enums.USER.S()}, Description: "Creating A User"},
-	UpdateMyProfile: {AllowedRoles: []string{enums.USER.S()}},
-	ChangeMyPwd:     {AllowedRoles: []string{enums.USER.S()}},
+	GetMyProfile:    {AllowedRoles: []string{}, Description: "Creating A User"},
+	UpdateMyProfile: {AllowedRoles: []string{}},
+	ChangeMyPwd:     {AllowedRoles: []string{}},
 }
 
 func SetUserProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) {
@@ -47,7 +46,7 @@ func SetUserProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) {
 		Method:      http.MethodGet,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(GetMyProfile, true, ProfilePermissionsMap[GetMyProfile].AllowedRoles...)},
+		Middlewares: huma.Middlewares{provServ.Authorization(GetMyProfile, ProfilePermissionsMap[GetMyProfile].AllowedRoles, nil)},
 	}, adminHandler.GetMyProfile)
 
 	huma.Register(humaRouter, huma.Operation{
@@ -55,7 +54,7 @@ func SetUserProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) {
 		Method:      http.MethodPatch,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(UpdateMyProfile, true)},
+		Middlewares: huma.Middlewares{provServ.Authorization(UpdateMyProfile, nil, nil)},
 	}, adminHandler.UpdateMyProfile)
 
 	huma.Register(humaRouter, huma.Operation{
@@ -63,7 +62,7 @@ func SetUserProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) {
 		Method:      http.MethodPost,
 		Path:        path + "/change_pwd",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(ChangeMyPwd, true)},
+		Middlewares: huma.Middlewares{provServ.Authorization(ChangeMyPwd, nil, nil)},
 	}, adminHandler.UpdateMyPassword)
 
 	huma.Register(humaRouter, huma.Operation{
@@ -71,7 +70,7 @@ func SetUserProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) {
 		Method:      http.MethodPost,
 		Path:        path + "/change_email",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(ChangeEmailReq, true, ProfilePermissionsMap[AdminChangeEmailReq].AllowedRoles...)},
+		Middlewares: huma.Middlewares{provServ.Authorization(ChangeEmailReq, ProfilePermissionsMap[AdminChangeEmailReq].AllowedRoles, nil)},
 	}, adminHandler.UpdateMyEmailReq)
 
 	huma.Register(humaRouter, huma.Operation{
@@ -79,7 +78,7 @@ func SetUserProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) {
 		Method:      http.MethodPost,
 		Path:        path + "/verify_change_email",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(ChangeEmailVerify, true, ProfilePermissionsMap[ChangeEmailVerify].AllowedRoles...)},
+		Middlewares: huma.Middlewares{provServ.Authorization(ChangeEmailVerify, ProfilePermissionsMap[ChangeEmailVerify].AllowedRoles, nil)},
 	}, adminHandler.VerifyMyChangeEmailReq)
 
 }
