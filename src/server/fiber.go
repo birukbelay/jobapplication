@@ -15,6 +15,7 @@ import (
 	"github.com/projTemplate/goauth/src/app/account/profile"
 	admins "github.com/projTemplate/goauth/src/app/admin/admin_users"
 	"github.com/projTemplate/goauth/src/app/admin/companies"
+	"github.com/projTemplate/goauth/src/app/general/upload"
 	"github.com/projTemplate/goauth/src/app/owner/company"
 	"github.com/projTemplate/goauth/src/app/owner/inviteCode"
 	"github.com/projTemplate/goauth/src/app/owner/user"
@@ -102,6 +103,7 @@ func (s *FiberServer) SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IPro
 	company.SetupOwnerCompanyRoutes(humaRouter, dbs, company.NewService(dbs))
 	inviteCode.SetupInviteCodeRoutes(humaRouter, dbs, inviteCode.NewService(dbs))
 	user.SetupCompanyUserRoutes(humaRouter, dbs, user.NewService(dbs))
+	upload.SetupUploadRoutes(humaRouter, dbs, upload.NewUploadGormServ(dbs))
 	// //Admin Routes
 
 	// //common routes

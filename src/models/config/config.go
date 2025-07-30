@@ -1,15 +1,19 @@
 package config
 
+import conf "github.com/birukbelay/gocmn/src/config"
+
 type EnvConfig struct {
 	ServerPort string `koanf:"SERVER_PORT"`
 	ServerHost string `koanf:"SERVER_HOST"`
 
 	SqlDbConfig SqlDbConfig `koanf:",squash"`
 	JwtVar
-	S3Config
-	CloudinaryConfig
+	// S3Config
+	// CloudinaryConfig
 	KeyValConfig
 	SmtpCred
+	conf.CloudinaryConfig
+	conf.S3Config
 }
 
 type S3Config struct {

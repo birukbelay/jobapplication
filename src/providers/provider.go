@@ -7,6 +7,7 @@ import (
 	"github.com/birukbelay/gocmn/src/consts"
 	"github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/logger"
+	"github.com/birukbelay/gocmn/src/provider/upload"
 	"github.com/birukbelay/gocmn/src/util"
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
@@ -21,19 +22,21 @@ type IProviderS struct {
 	EmailSender            email.EmailSender
 	VerificationCodeSender email.VerificationSender
 	KeyValServ             KeyValServ
-
-	EnvConf *config.EnvConfig
+	UploadServ             upload.FileUploadInterface
+	EnvConf                *config.EnvConfig
 	// UploadServ upload.FileUploadInterface
 	//will have upload services, email services
 }
 
-func NewProvider(conn *gorm.DB, env *config.EnvConfig, emailSender email.EmailSender, verificationSender email.VerificationSender, keyValServ KeyValServ) *IProviderS {
+func NewProvider(conn *gorm.DB, env *config.EnvConfig, emailSender email.EmailSender, verificationSender email.VerificationSender, keyValServ KeyValServ, uploadServ upload.FileUploadInterface) *IProviderS {
+
 	return &IProviderS{
 		GormConn:               conn,
 		EnvConf:                env,
 		EmailSender:            emailSender,
 		VerificationCodeSender: verificationSender,
 		KeyValServ:             keyValServ,
+		UploadServ:             uploadServ,
 	}
 }
 
