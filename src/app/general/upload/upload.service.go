@@ -37,9 +37,36 @@ type FileOpt struct {
 	ModelType *string
 }
 
-func (ups *GormUploadServ) SaveSingleFile(ctx context.Context, file *multipart.FileHeader, ownerId string, fileOPt *FileOpt) (dtos.GResp[*models.Upload], error) {
+func (ups *GormUploadServ) SaveFileHeader(ctx context.Context, file *multipart.FileHeader, ownerId string, fileOPt *FileOpt) (dtos.GResp[*models.Upload], error) {
 
-	fileResp, err := ups.CmnServ.UploadServ.UploadSingleFile(file)
+	fileResp, err := ups.CmnServ.UploadServ.UploadFileHeader(file, nil)
+	if err != nil {
+		return dtos.RespStatusMsgS[*models.Upload](fileResp.Error, fileResp.Status), err
+	}
+	uploadDtos, err := util.MarshalToStruct[models.UploadDto](fileResp.Body)
+	if err != nil {
+		return dtos.RespStatusMsgS[*models.Upload](fileResp.Error, fileResp.Status), err
+	}
+	//TODO: add the ownerId, groupId & prefix
+	uploadDtos.UserID = ownerId
+	if fileOPt != nil {
+		if fileOPt.ModelId != nil && fileOPt.ModelType != nil {
+			uploadDtos.ModelID = *fileOPt.ModelId
+			uploadDtos.ModelType = *fileOPt.ModelType
+		}
+
+	}
+
+	upld, err := generic.DbCreateOne[models.Upload](ups.conn, ctx, uploadDtos, nil)
+	if err != nil {
+		return dtos.InternalErrMS[*models.Upload](err.Error()), err
+	}
+	return dtos.SuccessS(&upld.Body, upld.RowsAffected), nil
+}
+
+func (ups *GormUploadServ) SaveFile(ctx context.Context, file multipart.File, ownerId string, fileOPt *FileOpt) (dtos.GResp[*models.Upload], error) {
+
+	fileResp, err := ups.CmnServ.UploadServ.UploadFile(file, nil)
 	if err != nil {
 		return dtos.RespStatusMsgS[*models.Upload](fileResp.Error, fileResp.Status), err
 	}

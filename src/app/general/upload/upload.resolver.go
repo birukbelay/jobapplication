@@ -27,7 +27,7 @@ func (uph *GinUploadHandler) SingleFileUpload(ctx context.Context, input *struct
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
 	files := input.RawBody.File["filename"]
-	uploads, err := uph.UploadServ.SaveSingleFile(ctx, files[0], v.UserId, nil)
+	uploads, err := uph.UploadServ.SaveFileHeader(ctx, files[0], v.UserId, nil)
 	if err != nil {
 		return dtos.HumaReturnG(uploads, err)
 	}
@@ -46,7 +46,15 @@ func (uph *GinUploadHandler) FileUpload(ctx context.Context, input *struct {
 }) (*dtos.HumaResponse[dtos.GResp[*models.Upload]], error) {
 	logger.LogTrace("file is", input.RawBody.Data().SomeNumbers)
 
-	return nil, nil
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
+	if !ok {
+		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
+	}
+	uploads, err := uph.UploadServ.SaveFile(ctx, input.RawBody.Data().MyFile, v.UserId, nil)
+	if err != nil {
+		return dtos.HumaReturnG(uploads, err)
+	}
+	return dtos.HumaReturnG(uploads, nil)
 }
 func (uph *GinUploadHandler) OffsetPaginatedUploads(ctx context.Context, filter *struct {
 	models.UploadFilter
