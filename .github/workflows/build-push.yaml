@@ -3,7 +3,7 @@ name: Build and Push Docker Image test
 # Trigger the workflow on push to the main branch or on pull requests
 on:
   push:
-    branches: [main]
+    branches: [template]
     branches: [production]
   pull_request:
     branches: [production]
