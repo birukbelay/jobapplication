@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8001"  # (host_port:container_port)
+    env_file:
+      - .env
+      - .env.remote
+    volumes:
+      - ./.env:/.env # so that, when the .env changes we can just do docker compose up, without rebuilding it
+      - ./.env.remote:/.env.remote
