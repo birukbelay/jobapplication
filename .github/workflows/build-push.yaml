@@ -1,0 +1,37 @@
+name: Build and Push Docker Image test
+
+# Trigger the workflow on push to the main branch or on pull requests
+on:
+  push:
+    branches: [main]
+    branches: [production]
+  pull_request:
+    branches: [production]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Required to push to GitHub Container Registry
+    steps:
+      # Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set lowercase owner
+        run: echo "LOWERCASE_OWNER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      # Build and push the Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ env.LOWERCASE_OWNER }}/my-app:latest
