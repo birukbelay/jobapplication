@@ -312,3 +312,5 @@ documentation
 Docker
 !src
 !public/static/styles/*
+!/public/static/
+!public/static
