@@ -317,3 +317,4 @@ public/
 .env*
 !.env.example
 !public/static/styles/*
+
