@@ -64,6 +64,11 @@ type InviteCodeDto struct {
 	UserInfo *string `json:"user_info,omitempty" `
 	Active   bool    `json:"active,omitempty" `
 }
+
+func (d InviteCodeDto) SetOnCreate(key string) {
+	d.CompanyID = key
+}
+
 type InviteCodeUpdateDto struct {
 	Name      string     `json:"name,omitempty" `
 	ExpiresAt *time.Time `json:"expires_at,omitempty" `

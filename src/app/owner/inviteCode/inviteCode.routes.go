@@ -25,13 +25,13 @@ func NewService(genServ *providers.IProviderS) *Service {
 type HumaInviteCodeHandler struct {
 	// CmnServ *gen.IGenericGormServ
 	Service  *Service
-	GHandler *generic.IGenericController[models.InviteCode, models.InviteCodeDto, models.InviteCodeUpdateDto, models.InviteCodeFilter, models.InviteCodeQuery]
+	GHandler *generic.IGenericAuthController[models.InviteCode, models.InviteCodeDto, models.InviteCodeUpdateDto, models.InviteCodeFilter, models.InviteCodeQuery]
 	// DbService *gen.IGenericGormServT[models.InviteCode, models.InviteCodeDto, models.LogTraceDto]
 }
 
 // NewLogTraceHandler creates a content handler from IContentService & Generic Gorm Service
 func NewInviteCodeHandler(serv *Service) *HumaInviteCodeHandler {
-	return &HumaInviteCodeHandler{Service: serv, GHandler: generic.NewGenericController[models.InviteCode, models.InviteCodeDto, models.InviteCodeUpdateDto, models.InviteCodeFilter, models.InviteCodeQuery](serv.ProvServ.GormConn)}
+	return &HumaInviteCodeHandler{Service: serv, GHandler: generic.NewGenericAuthController[models.InviteCode, models.InviteCodeDto, models.InviteCodeUpdateDto, models.InviteCodeFilter, models.InviteCodeQuery](serv.ProvServ.GormConn, consts.COMPANY_ID, consts.CTXCompany_ID)}
 }
 
 const (
@@ -65,7 +65,7 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 		Method:      http.MethodGet,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedInviteCodes,  OperationMap[OffsetPaginatedInviteCodes].AllowedRoles,nil)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedInviteCodes, OperationMap[OffsetPaginatedInviteCodes].AllowedRoles, nil)},
 	}, genericController.OffsetPaginated,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -73,7 +73,7 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 		Method:      http.MethodPost,
 		Path:        path,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateInviteCode,  OperationMap[CreateInviteCode].AllowedRoles,nil)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateInviteCode, OperationMap[CreateInviteCode].AllowedRoles, nil)},
 	}, genericController.CreateInviteCode,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -81,23 +81,23 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 		Method:      http.MethodGet,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneInviteCode,  OperationMap[GetOneInviteCode].AllowedRoles,nil)},
-	}, genericController.GetOneInviteCode,
+		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneInviteCode, OperationMap[GetOneInviteCode].AllowedRoles, nil)},
+	}, genericController.GHandler.AuthGetOneById,
 	)
 	huma.Register(humaRouter, huma.Operation{
 		OperationID: UpdateOneInviteCode.Str(),
 		Method:      http.MethodPatch,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateOneInviteCode,  OperationMap[UpdateOneInviteCode].AllowedRoles,nil)},
-	}, genericController.UpdateOneInviteCode,
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateOneInviteCode, OperationMap[UpdateOneInviteCode].AllowedRoles, nil)},
+	}, genericController.GHandler.AuthUpdateOneById,
 	)
 	huma.Register(humaRouter, huma.Operation{
 		OperationID: CreateAndSendInviteCode.Str(),
 		Method:      http.MethodPost,
 		Path:        path + "/send_one",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateAndSendInviteCode,  OperationMap[CreateAndSendInviteCode].AllowedRoles,nil)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateAndSendInviteCode, OperationMap[CreateAndSendInviteCode].AllowedRoles, nil)},
 	}, genericController.CreateAndSendInviteCode,
 	)
 	huma.Register(humaRouter, huma.Operation{
@@ -105,7 +105,7 @@ func SetupInviteCodeRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, s
 		Method:      http.MethodPost,
 		Path:        path + "/join",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(JoinViaInviteCode,  OperationMap[JoinViaInviteCode].AllowedRoles,nil)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(JoinViaInviteCode, OperationMap[JoinViaInviteCode].AllowedRoles, nil)},
 	}, genericController.JoinViaInviteCode,
 	)
 

@@ -50,31 +50,6 @@ func (uh *HumaInviteCodeHandler) CreateInviteCode(ctx context.Context, dto *dtos
 	return dtos.HumaReturnG(resp, err)
 }
 
-func (uh *HumaInviteCodeHandler) GetOneInviteCode(ctx context.Context, input *dtos.HumaInputId) (*dtos.HumaResponse[dtos.GResp[models.InviteCode]], error) {
-	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
-	if !ok {
-		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
-	}
-	resp, err := generic.DbGetOne[models.InviteCode](uh.GHandler.GormConn, ctx, models.InviteCodeFilter{CompanyID: v.CompanyId, ID: input.ID}, nil)
-	if err != nil {
-		return dtos.HumaReturnG(resp, err)
-	}
-	return dtos.HumaReturnG(resp, err)
-}
-
-func (uh *HumaInviteCodeHandler) UpdateOneInviteCode(ctx context.Context, dto *dtos.HumaReqBodyId[models.InviteCodeUpdateDto]) (*dtos.HumaResponse[dtos.GResp[models.InviteCode]], error) {
-	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
-	if !ok {
-		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
-	}
-
-	resp, err := generic.DbUpdateByFilter[models.InviteCode](uh.GHandler.GormConn, ctx, models.InviteCodeFilter{CompanyID: v.CompanyId, ID: dto.ID}, dto.Body, nil)
-	if err != nil {
-		return dtos.HumaReturnG(resp, err)
-	}
-	return dtos.HumaReturnG(resp, err)
-}
-
 func (uh *HumaInviteCodeHandler) CreateAndSendInviteCode(ctx context.Context, dto *dtos.HumaReqBody[models.InviteCodeDto]) (*dtos.HumaResponse[dtos.GResp[models.InviteCode]], error) {
 
 	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
