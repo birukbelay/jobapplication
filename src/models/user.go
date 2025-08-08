@@ -21,8 +21,8 @@ type User struct {
 }
 
 type UserDto struct {
-	FirstName string  `json:"firsName,omitempty" minLength:"1"`
-	LastName  string  `json:"lastName,omitempty" `
+	FirstName string  `json:"first_name,omitempty" minLength:"1"`
+	LastName  string  `json:"last_name,omitempty" `
 	Email     *string `json:"email,omitempty" format:"email"  gorm:"uniqueIndex" `
 	Username  string  `json:"username,omitempty"`
 	Avatar    string  `json:"avatar,omitempty" `
@@ -32,6 +32,10 @@ type UserDto struct {
 	Password      string     `json:"-" `
 	Role          enums.Role `gorm:"default:OWNER" json:"role,omitempty" `
 	AccountStatus enums.AccountStatus
+}
+
+func (d UserDto) SetOnCreate(key string) {
+	d.CompanyID = &key
 }
 
 // cant update the email, accountstatus

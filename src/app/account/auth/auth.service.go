@@ -8,6 +8,7 @@ import (
 	"github.com/birukbelay/gocmn/src/generic"
 	"github.com/birukbelay/gocmn/src/logger"
 	cmn "github.com/birukbelay/gocmn/src/logger"
+	"github.com/birukbelay/gocmn/src/provider/db/redis"
 	"github.com/birukbelay/gocmn/src/resp_const"
 	"github.com/birukbelay/gocmn/src/util"
 	"github.com/mitchellh/mapstructure"
@@ -18,7 +19,6 @@ import (
 	"github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/src/models/enums"
 	"github.com/projTemplate/goauth/src/providers"
-	"github.com/projTemplate/goauth/src/providers/db/redis"
 )
 
 type Service[T models.IntUsr] struct {

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/birukbelay/gocmn/src/consts"
+	common "github.com/birukbelay/gocmn/src/consts"
 	"github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/logger"
 	"github.com/birukbelay/gocmn/src/provider/upload"
@@ -12,7 +13,6 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 
-	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/src/providers/email"
 )

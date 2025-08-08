@@ -7,7 +7,6 @@ import (
 	"github.com/birukbelay/gocmn/src/generic"
 	"github.com/danielgtaylor/huma/v2"
 
-	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models"
 	"github.com/projTemplate/goauth/src/models/enums"
 	"github.com/projTemplate/goauth/src/providers"
@@ -26,13 +25,13 @@ func NewService(genServ *providers.IProviderS) *Service {
 type HumaUserHandler struct {
 	// CmnServ *gen.IGenericGormServ
 	Service  *Service
-	GHandler *generic.IGenericController[models.User, models.UserDto, models.UserUpdateDto, models.UserFilter, models.UserQuery]
+	GHandler *generic.IGenericAuthController[models.User, models.UserDto, models.UserUpdateDto, models.UserFilter, models.UserQuery]
 	// DbService *gen.IGenericGormServT[models.User, models.UserDto, models.LogTraceDto]
 }
 
 // NewLogTraceHandler creates a content handler from IContentService & Generic Gorm Service
 func NewUserHandler(serv *Service) *HumaUserHandler {
-	return &HumaUserHandler{Service: serv, GHandler: generic.NewGenericAuthController[models.User, models.UserDto, models.UserUpdateDto, models.UserFilter, models.UserQuery](serv.ProvServ.GormConn, "company_id", common.CTXCompany_ID.Str())}
+	return &HumaUserHandler{Service: serv, GHandler: generic.NewGenericAuthController[models.User, models.UserDto, models.UserUpdateDto, models.UserFilter, models.UserQuery](serv.ProvServ.GormConn, consts.COMPANY_ID, consts.CTXCompany_ID)}
 }
 
 const (
@@ -88,7 +87,7 @@ func SetupCompanyUserRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 		Path:        pathId,
 		Tags:        tags,
 		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateOneUser, OperationMap[UpdateOneUser].AllowedRoles, nil)},
-	}, genericController.UpdateOneUser,
+	}, genericController.GHandler.AuthUpdateOneById,
 	)
 
 }

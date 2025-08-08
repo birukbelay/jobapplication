@@ -10,26 +10,11 @@ type EnvConfig struct {
 	JwtVar
 	// S3Config
 	// CloudinaryConfig
-	KeyValConfig
+
 	SmtpCred
 	conf.CloudinaryConfig
 	conf.S3Config
-}
-
-type S3Config struct {
-	Endpoint         string `koanf:"S3_ENDPOINT"`
-	S3WebEndpoint    string `koanf:"S3_WEB_ENDPOINT"`
-	Region           string `koanf:"S3_REGION"`
-	S3ForcePathStyle bool   `koanf:"S3_FORCE_PATH_STYLE"` // TODO: Remove?
-	AccessKey        string `koanf:"S3_ACCESS_KEY_ID"`
-	SecretKey        string `koanf:"S3_SECRET_ACCESS_KEY"`
-	BucketName       string `koanf:"S3_BUCKET_NAME"`
-}
-type CloudinaryConfig struct {
-	CloudinaryCloudName string `koanf:"CLOUDINARY_CLOUD_NAME"`
-	CloudinaryAPIKey    string `koanf:"CLOUDINARY_API_KEY"`
-	CloudinaryAPISecret string `koanf:"CLOUDINARY_API_SECRET"`
-	CloudinaryFolder    string `koanf:"CLOUDINARY_FOLDER"`
+	conf.KeyValConfig
 }
 
 type SqlDbConfig struct {
@@ -40,13 +25,6 @@ type SqlDbConfig struct {
 	SqlPort  string `koanf:"POSTGRES_PORT"`
 	Driver   string `koanf:"SQL_DRIVER"`
 	SSLMode  string `koanf:"SSL_MODE"`
-}
-type KeyValConfig struct {
-	KVDbName   int    `koanf:"KV_DB"`
-	KVUsername string `koanf:"KV_USER"`
-	KVPassword string `koanf:"KV_PASSWORD"`
-	KVHost     string `koanf:"KV_HOST"`
-	KVPort     string `koanf:"KV_PORT"`
 }
 
 type JwtVar struct {

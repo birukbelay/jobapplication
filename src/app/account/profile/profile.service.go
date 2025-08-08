@@ -6,11 +6,11 @@ import (
 	ICrypt "github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/dtos"
 	sql_db "github.com/birukbelay/gocmn/src/generic"
+	"github.com/birukbelay/gocmn/src/provider/db/redis"
 	ICnst "github.com/birukbelay/gocmn/src/resp_const"
 
 	"github.com/projTemplate/goauth/src/models"
 	"github.com/projTemplate/goauth/src/providers"
-	"github.com/projTemplate/goauth/src/providers/db/redis"
 )
 
 type Service[T models.IntUsr] struct {

@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 	"net/http"
 
+	common "github.com/birukbelay/gocmn/src/consts"
 	"github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/dtos"
 	"github.com/birukbelay/gocmn/src/generic"
@@ -12,7 +13,6 @@ import (
 	"github.com/birukbelay/gocmn/src/util"
 	"github.com/danielgtaylor/huma/v2"
 
-	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models"
 )
 

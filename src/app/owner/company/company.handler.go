@@ -4,12 +4,12 @@ import (
 	"context"
 	"net/http"
 
+	common "github.com/birukbelay/gocmn/src/consts"
 	"github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/dtos"
 	"github.com/birukbelay/gocmn/src/generic"
 	"github.com/danielgtaylor/huma/v2"
 
-	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models"
 	"github.com/projTemplate/goauth/src/models/enums"
 )
