@@ -1,13 +1,17 @@
 package models
 
-import "time"
+import (
+	"time"
 
-type RegisterClientInput struct {
-	FirstName string `json:"fName" binding:"required,min=2" `
-	LastName  string `json:"lName" `
-	Email     string `json:"email" binding:"required,email" gorm:"unique"`
-	Password  string `json:"password" binding:"required,min=6"`
-	Avatar    string `json:"avatar" `
+	"github.com/projTemplate/goauth/src/models/enums"
+)
+
+type RegisterUserInput struct {
+	FirstName string     `json:"fName" binding:"required,min=2" `
+	LastName  string     `json:"lName" `
+	Email     string     `json:"email" binding:"required,email" gorm:"unique"`
+	Password  string     `json:"password" binding:"required,min=6"`
+	Role      enums.Role `gorm:"default:COMPANY" json:"role,omitempty"  enum:"COMPANY, APPLICANT"`
 }
 
 // ProfileUpdateDto This is Used for creating and updating the user

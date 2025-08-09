@@ -22,9 +22,9 @@ func NewService(genServ *providers.IProviderS) *Service {
 }
 
 const (
-	OffsetPaginatedAdmins = consts.OperationId("Ad-1-OffsetPaginatedAdmins")
-	GetOneAdminById       = consts.OperationId("Ad-2-GetOneAdminById")
-	UpdateAdmin           = consts.OperationId("Ad-3-UpdateAdmin")
+	OffsetPaginatedAdmins = consts.OperationId("Ad-1-OffsetPaginatedUsers")
+	GetOneAdminById       = consts.OperationId("Ad-2-GetOneUserById")
+	UpdateAdmin           = consts.OperationId("Ad-3-UpdateUser")
 )
 
 var OperationMap = map[consts.OperationId]models.OperationAccess{

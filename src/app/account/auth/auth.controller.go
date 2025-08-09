@@ -8,7 +8,7 @@ import (
 	"github.com/birukbelay/gocmn/src/dtos"
 
 	Icnst "github.com/projTemplate/goauth/src/common"
-	 "github.com/projTemplate/goauth/src/models"
+	"github.com/projTemplate/goauth/src/models"
 )
 
 func CreateCookie(Name, Value string, minutes int) http.Cookie {
@@ -24,12 +24,12 @@ func CreateCookie(Name, Value string, minutes int) http.Cookie {
 	}
 }
 
-func (ah *GinAuthHandler[T]) Register(ctx context.Context, inputs *dtos.HumaReqBody[models.RegisterClientInput]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
-	usr, err := ah.AdminAuthServ.RegisterCompanyOwner(ctx, inputs.Body)
+func (ah *GinAuthHandler[T]) Register(ctx context.Context, inputs *dtos.HumaReqBody[models.RegisterUserInput]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
+	usr, err := ah.AdminAuthServ.RegisterUser(ctx, inputs.Body)
 	return dtos.HumaReturnG(usr, err)
 }
 func (ah *GinAuthHandler[T]) VerifyAccount(ctx context.Context, inputs *dtos.HumaReqBody[VerificationInput]) (*dtos.HumaResponse[dtos.GResp[bool]], error) {
-	usr, err := ah.AdminAuthServ.VerifyCompanyUser(ctx, inputs.Body)
+	usr, err := ah.AdminAuthServ.VerifyUser(ctx, inputs.Body)
 	return dtos.HumaReturnG(usr, err)
 }
 func (ah *GinAuthHandler[T]) Login(ctx context.Context, inputs *dtos.HumaReqBody[LoginData]) (*dtos.HumaResponse[dtos.GResp[TokenResponse]], error) {

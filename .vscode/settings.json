@@ -1,3 +1,4 @@
 {
-    "todomd.autoArchiveTasks": true
+    "todomd.autoArchiveTasks": true,
+    "kiroAgent.configureMCP": "Disabled"
 }

@@ -6,18 +6,10 @@ import (
 	"github.com/projTemplate/goauth/src/models/enums"
 )
 
-type Admin struct {
-	Base `mapstructure:",squash" `
-
-	UserDto       `mapstructure:",squash" `
-	CompanyStatus string   `json:"company_status,omitempty" ` //approved, info filled,
-	Company       *Company `gorm:"foreignKey:CompanyID"`
-}
-
 type User struct {
 	Base    `mapstructure:",squash" `
 	UserDto `mapstructure:",squash" `
-	Company *Company `json:"member_company,omitempty" gorm:"foreignKey:CompanyID"`
+	// Company *Job `json:"member_company,omitempty" gorm:"foreignKey:CompanyID"`
 }
 
 type UserDto struct {

@@ -33,8 +33,8 @@ func NewAdminAuthServH[T models.IntUsr](conf *config.EnvConfig, genServ *provide
 	}
 }
 
-// RegisterCompanyOwner (acc-01) , [AccountStatus], set(pwd,)
-func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input models.RegisterClientInput) (dtos.GResp[bool], error) {
+// RegisterUser (acc-01) , [AccountStatus], set(pwd,)
+func (aus Service[T]) RegisterUser(ctx context.Context, input models.RegisterUserInput) (dtos.GResp[bool], error) {
 	//Check if the email already exists
 	usr, err := generic.DbGetOne[T](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Email}, nil)
 	//if the user already exists
@@ -47,7 +47,7 @@ func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input models.Reg
 			return dtos.BadReqC[bool](resp_const.UserExists), resp_const.UserExistError
 		}
 	}
-	//TODO: verify the Email
+
 	//user userDto here
 	var userModel models.UserDto
 	if err := mapstructure.Decode(input, &userModel); err != nil {
@@ -59,11 +59,9 @@ func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input models.Reg
 		return dtos.InternalErrMS[bool]("Hashing Error"), err
 	}
 	userModel.Password = hash
-	userModel.Role = enums.UNVERIFIED_USER
 	userModel.AccountStatus = enums.AccountPendingVerification
 	userModel.Active = false
 
-	// []string{"Password", "VerificationCodeHash", "VerificationCodeExpire", "AccountStatus", "Role", "Active"}
 	user, err := generic.DbUpsertOneAllFields[T](aus.Provider.GormConn, ctx, &userModel, []clause.Column{{Name: "email"}}, &generic.Opt{Debug: true})
 	if err != nil {
 		cmn.LogTrace("error crating", err)
@@ -72,8 +70,8 @@ func (aus Service[T]) RegisterCompanyOwner(ctx context.Context, input models.Reg
 	return aus.UTIL_SendVerification(ctx, input.Email, models.GetID(user.Body), models.SignupVerification)
 }
 
-// VerifyCompanyUser (acc-01), [id]x
-func (aus Service[T]) VerifyCompanyUser(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
+// VerifyUser (acc-01), [id]x
+func (aus Service[T]) VerifyUser(ctx context.Context, input VerificationInput) (dtos.GResp[bool], error) {
 	//Check if the email already exists
 	usr, err := generic.DbGetOne[T](aus.Provider.GormConn, ctx, models.UserFilter{Email: input.Info, AccountStatus: enums.AccountPendingVerification}, nil)
 	if err != nil {

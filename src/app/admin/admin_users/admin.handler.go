@@ -11,21 +11,21 @@ import (
 
 type HumaHandler struct {
 	Service  *Service
-	GHandler *generic.IGenericController[models.Admin, models.UserDto, models.UserDto, models.UserFilter, models.UserQuery]
+	GHandler *generic.IGenericController[models.User, models.UserDto, models.UserDto, models.UserFilter, models.UserQuery]
 }
 
 func NewHandler(serv *Service) *HumaHandler {
-	return &HumaHandler{Service: serv, GHandler: generic.NewGenericController[models.Admin, models.UserDto, models.UserDto, models.UserFilter, models.UserQuery](serv.ProvServ.GormConn)}
+	return &HumaHandler{Service: serv, GHandler: generic.NewGenericController[models.User, models.UserDto, models.UserDto, models.UserFilter, models.UserQuery](serv.ProvServ.GormConn)}
 }
 
 func (uh *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 	models.UserFilter
 	models.UserQuery
 	dtos.PaginationInput
-}) (*dtos.HumaResponse[dtos.PResp[[]models.Admin]], error) {
+}) (*dtos.HumaResponse[dtos.PResp[[]models.User]], error) {
 	sort, selectedFields := filter.UserQuery.GetQueries()
 	filter.PaginationInput.Select = selectedFields
 	filter.PaginationInput.SortBy = sort
-	resp, err := generic.DbFetchManyWithOffset[models.Admin](uh.GHandler.GormConn, ctx, filter.UserFilter, filter.PaginationInput, nil)
+	resp, err := generic.DbFetchManyWithOffset[models.User](uh.GHandler.GormConn, ctx, filter.UserFilter, filter.PaginationInput, nil)
 	return dtos.PHumaReturn(resp, err)
 }

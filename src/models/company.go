@@ -1,102 +1,86 @@
 package models
 
 import (
-	"time"
-
 	"github.com/projTemplate/goauth/src/models/enums"
 )
 
-type Company struct {
-	Base       `mapstructure:",squash" `
-	CompanyDto `mapstructure:",squash" `
-	Employees  []User `gorm:"foreignKey:CompanyID"`
-	Owner      Admin  `gorm:"foreignKey:OwnerID"`
+type Job struct {
+	Base   `mapstructure:",squash"`
+	JobDto `mapstructure:",squash"`
+	// Applications []Application `gorm:"foreignKey:JobID"`
+	CreatedBy User `gorm:"foreignKey:CreatedBy"`
 }
-type CompanyDto struct {
-	Name          string              `json:"name"`
-	Handle        string              `json:"handle" gorm:"unique"`
-	About         string              `json:"about,omitempty"`
-	Location      string              `json:"location,omitempty"`
-	CompanyStatus enums.CompanyStatus `json:"company_status,omitempty" enum:"approved,pending_approval,deleted"`
+type JobDto struct {
+	Title       string          `json:"title,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Location    string          `json:"location,omitempty"`
+	JobStatus   enums.JobStatus `json:"job_status,omitempty" enum:"Draft,Open,Closed"`
 
 	//Relationships
-	OwnerID string `json:"owner_id,omitempty"`
-}
-type CompanyUpdateDto struct {
-	Handle   string `json:"handle" `
-	Name     string `json:"name"`
-	About    string `json:"about,omitempty"`
-	Location string `json:"location,omitempty"`
-}
-type CompanyFilter struct {
-	ID      string `query:"id"`
-	Name    string `query:"name" `
-	OwnerID string `query:"owner_id,omitempty"`
-	Handle  string `query:"handle" `
-}
-type CompanyQuery struct {
-	SelectedFields []string `query:"selected_fields" enum:"name,about,location,owner_id, id,created_at,updated_at"`
-	Sort           string   `query:"sort" enum:"name,created_at,updated_at"`
+	CreatedBy string `json:"created_by,omitempty"`
 }
 
-func (q CompanyQuery) GetQueries() (string, []string) {
+func (d JobDto) SetOnCreate(key string) {
+	d.CreatedBy = key
+}
+
+type JobUpdateDto struct {
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Location    string `json:"location,omitempty"`
+}
+type JobFilter struct {
+	ID        string          `query:"id"`
+	Title     string          `query:"title"`
+	CreatedBy string          `query:"owner_id"`
+	Location  string          `query:"location"`
+	JobStatus enums.JobStatus `query:"job_status"`
+}
+type JobQuery struct {
+	SelectedFields []string `query:"selected_fields" enum:"title,description,location,job_status,owner_id,id,created_at,updated_at"`
+	Sort           string   `query:"sort" enum:"title,location,job_status,created_at,updated_at"`
+}
+
+func (q JobQuery) GetQueries() (string, []string) {
 	return q.Sort, q.SelectedFields
 }
 
 // ==============. Invite Codes
 
-type InviteCode struct {
-	Base          `mapstructure:",squash" `
-	InviteCodeDto `mapstructure:",squash" `
-
-	Company Company `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
-	// Users   []User  `gorm:"foreignKey:CompanyID"`
-	UsageCount int `json:"usate_count,omitempty" `
+type Application struct {
+	Base           `mapstructure:",squash"`
+	ApplicationDto `mapstructure:",squash"`
+	Job            Job  `gorm:"foreignKey:JobID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Applicant      User `gorm:"foreignKey:ApplicantID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
-type InviteCodeDto struct {
-	Name      string     `json:"name,omitempty" `
-	CompanyID string     `json:"company_id,omitempty" gorm:"not null;index"`
-	Code      string     `json:"code,omitempty" gorm:"uniqueindex"`
-	UserRole  string     `json:"user_role,omitempty" `
-	ExpiresAt *time.Time `json:"expires_at,omitempty" `
-
-	MaxUsage *int    `json:"max_usage,omitempty" `
-	UserInfo *string `json:"user_info,omitempty" `
-	Active   bool    `json:"active,omitempty" `
+type ApplicationDto struct {
+	ApplicantID string `json:"applicant_id,omitempty" gorm:"not null;index"`
+	JobID       string `json:"job_id,omitempty" gorm:"not null;index"`
+	Status      string `json:"status,omitempty" gorm:"default:'pending'"`
+	CoverLetter string `json:"cover_letter,omitempty"`
+	Resume      string `json:"resume,omitempty"`
 }
 
-func (d InviteCodeDto) SetOnCreate(key string) {
-	d.CompanyID = key
+func (d ApplicationDto) SetOnCreate(key string) {
+	d.ApplicantID = key
 }
 
-type InviteCodeUpdateDto struct {
-	Name      string     `json:"name,omitempty" `
-	ExpiresAt *time.Time `json:"expires_at,omitempty" `
-
-	MaxUsage *int `json:"max_usage,omitempty" `
-	Active   bool `json:"active,omitempty" `
+type ApplicationUpdateDto struct {
+	Status      string `json:"status,omitempty"`
+	CoverLetter string `json:"cover_letter,omitempty"`
+	Resume      string `json:"resume,omitempty"`
 }
-type InviteCodeFilter struct {
-	ID         string `query:"id"`
-	Name       string `query:"name" `
-	CompanyID  string `query:"company_id" `
-	Code       string `query:"code" `
-	UserRole   string `query:"code" `
-	UsageCount string `query:"code" `
-	MaxUsage   int    `query:"max_usage" `
-	UserInfo   string `query:"user_info" `
-	Active     bool   `query:"active" `
+type ApplicationFilter struct {
+	ID          string `query:"id,omitempty"`
+	ApplicantID string `query:"applicant_id,omitempty"`
+	JobID       string `query:"job_id,omitempty"`
+	Status      string `query:"status,omitempty"`
 }
-type InviteCodeQuery struct {
-	ExpiresAt      time.Time `query:"expires_at" `
-	SelectedFields []string  `query:"selected_fields" enum:"company_id,expires_at,user_role,usage_count,max_usage,user_info, id,created_at,updated_at"`
-	Sort           string    `query:"sort" enum:"company_id,usage_count,max_usage,expires_at,created_at,updated_at,id"`
+type ApplicationQuery struct {
+	SelectedFields []string `query:"selected_fields" enum:"applicant_id,job_id,status,cover_letter,resume,id,created_at,updated_at"`
+	Sort           string   `query:"sort" enum:"applicant_id,job_id,status,created_at,updated_at"`
 }
 
-func (q InviteCodeQuery) GetQueries() (string, []string) {
+func (q ApplicationQuery) GetQueries() (string, []string) {
 	return q.Sort, q.SelectedFields
-}
-
-type JoinViaCode struct {
-	Code string `json:"code" gorm:"uniqueindex"`
 }

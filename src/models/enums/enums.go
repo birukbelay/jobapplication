@@ -7,10 +7,9 @@ package enums
 type Role string
 
 const (
-	PLATFORM_ADMIN  = Role("PLATFORM_ADMIN")
-	USER            = Role("USER")
-	OWNER           = Role("OWNER")
-	UNVERIFIED_USER = Role("UNVERIFIED_USER")
+	PLATFORM_ADMIN = Role("PLATFORM_ADMIN")
+	APPLICANT      = Role("APPLICANT")
+	COMPANY        = Role("COMPANY")
 )
 
 func (r Role) S() string {
@@ -46,10 +45,10 @@ func (r AccountStatus) S() string {
 
 //=================================   !  CompanyStatus  ============================
 
-type CompanyStatus string
+type JobStatus string
 
 const (
-	CompanyPendingApproval = CompanyStatus("pending_approval")
-	CompanyApproved        = CompanyStatus("approved")
-	CompanyDisabled        = CompanyStatus("disabled")
+	STATUS_DRAFT  = JobStatus("Draft")
+	STATUS_OPEN   = JobStatus("Open")
+	STATUS_CLOSED = JobStatus("Closed")
 )

@@ -70,7 +70,7 @@ func SetUserProfileRoutes(humaRouter huma.API, provServ *providers.IProviderS) {
 		Method:      http.MethodPost,
 		Path:        path + "/change_email",
 		Tags:        tags,
-		Middlewares: huma.Middlewares{provServ.Authorization(ChangeEmailReq, ProfilePermissionsMap[AdminChangeEmailReq].AllowedRoles, nil)},
+		Middlewares: huma.Middlewares{provServ.Authorization(ChangeEmailReq, ProfilePermissionsMap[ChangeEmailReq].AllowedRoles, nil)},
 	}, adminHandler.UpdateMyEmailReq)
 
 	huma.Register(humaRouter, huma.Operation{

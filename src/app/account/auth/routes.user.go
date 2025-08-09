@@ -11,15 +11,26 @@ import (
 )
 
 const (
-	RegisterUser     = constant.OperationId("Au_1-Register")
-	VerifyUser       = constant.OperationId("Au_2-Verify")
-	LoginUser        = constant.OperationId("Au_3-Login")
-	RefreshTokenUser = constant.OperationId("Au_4-RefreshToken")
-	LogoutUser       = constant.OperationId("Au_5-Logout")
-	ForgotPwdUser    = constant.OperationId("Au_6-ForgotPwd")
-	ResetPwdUser     = constant.OperationId("Au_7-ResetPwd")
+	RegisterUser     = constant.OperationId("Au-1-Register")
+	VerifyUser       = constant.OperationId("Au-2-Verify")
+	LoginUser        = constant.OperationId("Au-3-Login")
+	RefreshTokenUser = constant.OperationId("Au-4-RefreshToken")
+	LogoutUser       = constant.OperationId("Au-5-Logout")
+	ForgotPwdUser    = constant.OperationId("Au-6-ForgotPwd")
+	ResetPwdUser     = constant.OperationId("Au-7-ResetPwd")
 )
 
+type GinAuthHandler[T models.IntUsr] struct {
+	AdminAuthServ *Service[T]
+	CmnServ       *providers.IProviderS
+}
+
+func NewAuthHandler[T models.IntUsr](cmnServ *providers.IProviderS, serv *Service[T]) *GinAuthHandler[T] {
+	return &GinAuthHandler[T]{
+		AdminAuthServ: serv,
+		CmnServ:       cmnServ,
+	}
+}
 func SetupUserAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv *Service[models.User]) {
 	handler := NewAuthHandler(providerS, serv)
 	tags := []string{"auth_user"}

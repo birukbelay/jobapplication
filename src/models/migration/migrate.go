@@ -10,13 +10,13 @@ import (
 )
 
 func MigrateDb2(Db *gorm.DB) {
-	err := Db.AutoMigrate(&models.Upload{}, &models.User{}, &models.Company{}, &models.Admin{})
+	err := Db.AutoMigrate(&models.Upload{}, &models.User{}, &models.Job{}, &models.Application{})
 	if err != nil {
 		logger.LogTrace("failed to AutoMigrate Users:", err.Error())
 		log.Panicln(err.Error())
 		return
 	}
-	err = Db.AutoMigrate(&models.Session{}, &models.VerificationCode{}, &models.InviteCode{})
+	err = Db.AutoMigrate(&models.Session{}, &models.VerificationCode{})
 	if err != nil {
 		logger.LogTrace("failed to AutoMigrate session or Verification code:", err.Error())
 		log.Panicln(err.Error())

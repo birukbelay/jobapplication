@@ -31,10 +31,10 @@ const (
 
 var OperationMap = map[consts.OperationId]models.OperationAccess{
 
-	SingleFileUpload:       {AllowedRoles: []string{enums.UNVERIFIED_USER.S(), enums.OWNER.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
-	UploadOne:              {AllowedRoles: []string{enums.UNVERIFIED_USER.S(), enums.OWNER.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
-	OffsetPaginatedUploads: {AllowedRoles: []string{enums.UNVERIFIED_USER.S(), enums.OWNER.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
-	GetOneUploadByFilter:   {AllowedRoles: []string{enums.UNVERIFIED_USER.S(), enums.OWNER.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
+	SingleFileUpload:       {AllowedRoles: []string{enums.COMPANY.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
+	UploadOne:              {AllowedRoles: []string{enums.COMPANY.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
+	OffsetPaginatedUploads: {AllowedRoles: []string{enums.COMPANY.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
+	GetOneUploadByFilter:   {AllowedRoles: []string{enums.COMPANY.S(), enums.PLATFORM_ADMIN.S()}, Description: ".."},
 }
 
 func SetupUploadRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, serv *GormUploadServ) {
