@@ -41,8 +41,8 @@ type Session struct {
 
 type VerificationCode struct {
 	Base      `mapstructure:",squash" `
-	UserId    string `gorm:"uniqueIndex;not null"`
-	Email     string
+	UserId    string      `gorm:"uniqueIndex;not null"`
+	Email     string      `gorm:"uniqueIndex;not null"`
 	CodeHash  string      `gorm:"not null"`
 	Purpose   CodePurpose `gorm:"not null"`
 	ExpiresAt *time.Time  `json:"-" `

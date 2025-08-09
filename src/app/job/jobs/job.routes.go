@@ -30,7 +30,7 @@ type HumaHandler struct {
 func NewHandler(serv *Service) *HumaHandler {
 	return &HumaHandler{
 		Service:  serv,
-		GHandler: generic.NewGenericAuthController[models.Job, models.JobDto, models.JobUpdateDto, models.JobFilter, models.JobQuery](serv.ProvServ.GormConn, consts.AUTH_FIELD("created_by"), consts.CTXUser_ID),
+		GHandler: generic.NewGenericAuthController[models.Job, models.JobDto, models.JobUpdateDto, models.JobFilter, models.JobQuery](serv.ProvServ.GormConn, consts.AUTH_FIELD("company_id"), consts.CTXUser_ID),
 	}
 }
 
@@ -93,7 +93,7 @@ func SetupJobRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, serv *Se
 		Path:        path,
 		Tags:        tags,
 		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateJob, OperationMap[CreateJob].AllowedRoles, nil)},
-	}, genericController.GHandler.AuthCreateOne)
+	}, genericController.CreateJob)
 
 	// Get paginated jobs
 

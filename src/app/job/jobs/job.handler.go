@@ -49,6 +49,19 @@ func (jh *HumaHandler) GetOneOpenJobById(ctx context.Context, filter *dtos.HumaI
 	resp, err := generic.DbGetOne[models.Job](jh.GHandler.GormConn, ctx, models.JobFilter{ID: filter.ID, JobStatus: enums.STATUS_OPEN}, nil)
 	return dtos.HumaReturnG(resp, err)
 }
+func (ah *HumaHandler) CreateJob(ctx context.Context, dto *dtos.HumaReqBody[models.JobDto]) (*dtos.HumaResponse[dtos.GResp[models.Job]], error) {
+
+	v, ok := ctx.Value(consts.CtxClaims.Str()).(crypto.CustomClaims)
+	if !ok {
+		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
+	}
+	dto.Body.CompanyID = v.UserId
+	resp, err := generic.DbCreateOne[models.Job](ah.GHandler.GormConn, ctx, dto.Body, nil)
+	if err != nil {
+		return dtos.HumaReturnG(resp, err)
+	}
+	return dtos.HumaReturnG(resp, err)
+}
 
 // func (jh *HumaHandler) CreateJob(ctx context.Context, input *struct {
 // 	Body models.JobDto `json:"job"`

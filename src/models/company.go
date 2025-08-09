@@ -17,7 +17,7 @@ type JobDto struct {
 	JobStatus   enums.JobStatus `json:"job_status,omitempty" enum:"Draft,Open,Closed"`
 
 	//Relationships
-	CompanyID string `json:"company_id,omitempty"`
+	CompanyID string `json:"company_id,omitempty" gorm:"not null;index"`
 }
 
 func (d JobDto) SetOnCreate(key string) {
