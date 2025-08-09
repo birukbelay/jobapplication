@@ -166,6 +166,10 @@ go build -o main .
 
 The API will be available at `http://localhost:8001`
 
+## deployment
+the deployment is setup so that when it is pushed to github it will trigger a github action that will build a new docker image and push it to the registry.
+- then it will trigger a render.com deployment via a hook
+
 ## 📚 API Documentation
 
 Once the application is running, you can access the interactive API documentation at:
