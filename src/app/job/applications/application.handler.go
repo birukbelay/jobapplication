@@ -37,6 +37,7 @@ func (ah *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 	return dtos.PHumaReturn(resp, err)
 }
 
+// TODO add file handler here
 func (ah *HumaHandler) CreateApplication(ctx context.Context, dto *dtos.HumaReqBody[models.ApplicationDto]) (*dtos.HumaResponse[dtos.GResp[models.Application]], error) {
 
 	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)

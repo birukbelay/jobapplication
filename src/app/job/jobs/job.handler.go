@@ -2,24 +2,17 @@ package jobs
 
 import (
 	"context"
+	"net/http"
 
+	"github.com/birukbelay/gocmn/src/consts"
+	"github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/dtos"
 	"github.com/birukbelay/gocmn/src/generic"
+	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/projTemplate/goauth/src/models"
+	"github.com/projTemplate/goauth/src/models/enums"
 )
-
-type HumaHandler struct {
-	Service  *Service
-	GHandler *generic.IGenericController[models.Job, models.JobDto, models.JobUpdateDto, models.JobFilter, models.JobQuery]
-}
-
-func NewHandler(serv *Service) *HumaHandler {
-	return &HumaHandler{
-		Service:  serv,
-		GHandler: generic.NewGenericController[models.Job, models.JobDto, models.JobUpdateDto, models.JobFilter, models.JobQuery](serv.ProvServ.GormConn),
-	}
-}
 
 func (jh *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 	models.JobFilter
@@ -29,6 +22,24 @@ func (jh *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 	sort, selectedFields := filter.JobQuery.GetQueries()
 	filter.PaginationInput.Select = selectedFields
 	filter.PaginationInput.SortBy = sort
+	v, ok := ctx.Value(consts.CtxClaims.Str()).(crypto.CustomClaims)
+	if !ok {
+		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
+	}
+	filter.JobFilter.CreatedBy = v.UserId
+	resp, err := generic.DbFetchManyWithOffset[models.Job](jh.GHandler.GormConn, ctx, filter.JobFilter, filter.PaginationInput, nil)
+	return dtos.PHumaReturn(resp, err)
+}
+
+func (jh *HumaHandler) GetOpenJobs(ctx context.Context, filter *struct {
+	models.JobFilter
+	models.JobQuery
+	dtos.PaginationInput
+}) (*dtos.HumaResponse[dtos.PResp[[]models.Job]], error) {
+	sort, selectedFields := filter.JobQuery.GetQueries()
+	filter.PaginationInput.Select = selectedFields
+	filter.PaginationInput.SortBy = sort
+	filter.JobFilter.JobStatus = enums.STATUS_OPEN
 	resp, err := generic.DbFetchManyWithOffset[models.Job](jh.GHandler.GormConn, ctx, filter.JobFilter, filter.PaginationInput, nil)
 	return dtos.PHumaReturn(resp, err)
 }

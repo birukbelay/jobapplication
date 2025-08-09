@@ -33,7 +33,7 @@ func NewAuthHandler[T models.IntUsr](cmnServ *providers.IProviderS, serv *Servic
 }
 func SetupUserAuthRoutes(humaRouter huma.API, providerS *providers.IProviderS, serv *Service[models.User]) {
 	handler := NewAuthHandler(providerS, serv)
-	tags := []string{"auth_user"}
+	tags := []string{"auth"}
 	path := constant.ApiV1 + "/auth"
 
 	huma.Register(humaRouter, huma.Operation{

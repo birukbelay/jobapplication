@@ -25,16 +25,17 @@ func (d JobDto) SetOnCreate(key string) {
 }
 
 type JobUpdateDto struct {
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Location    string `json:"location,omitempty"`
+	Title       string          `json:"title,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Location    string          `json:"location,omitempty"`
+	JobStatus   enums.JobStatus `json:"job_status,omitempty" enum:"Draft,Open,Closed"`
 }
 type JobFilter struct {
 	ID        string          `query:"id"`
 	Title     string          `query:"title"`
 	CreatedBy string          `query:"owner_id"`
 	Location  string          `query:"location"`
-	JobStatus enums.JobStatus `query:"job_status"`
+	JobStatus enums.JobStatus `query:"job_status" enum:"Draft,Open,Closed"`
 }
 type JobQuery struct {
 	SelectedFields []string `query:"selected_fields" enum:"title,description,location,job_status,owner_id,id,created_at,updated_at"`
@@ -56,9 +57,10 @@ type Application struct {
 type ApplicationDto struct {
 	ApplicantID string `json:"applicant_id,omitempty" gorm:"not null;index"`
 	JobID       string `json:"job_id,omitempty" gorm:"not null;index"`
+	//
 	Status      string `json:"status,omitempty" gorm:"default:'pending'"`
 	CoverLetter string `json:"cover_letter,omitempty"`
-	Resume      string `json:"resume,omitempty"`
+	ResumeUrl   string `json:"resume_url,omitempty"`
 }
 
 func (d ApplicationDto) SetOnCreate(key string) {
