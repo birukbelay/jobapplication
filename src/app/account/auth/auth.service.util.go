@@ -45,10 +45,10 @@ func (aus Service[T]) UTIL_SendVerification(ctx context.Context, email, userId s
 	}
 	emailerr := aus.Provider.VerificationCodeSender.SendVerificationCode(email, verificationCode)
 	if emailerr != nil {
-		return dtos.InternalErrMS[bool]("Sending Email error"), emailerr
+		// return dtos.InternalErrMS[bool]("Sending Email error"), emailerr
 	}
 	verificationResp, err := generic.DbUpsertOneAllFields[models.VerificationCode](aus.Provider.GormConn, ctx, models.VerificationCode{
-		ExpiresAt: util.Ptr(time.Now().Add(time.Minute * 3)),
+		ExpiresAt: util.Ptr(time.Now().Add(time.Minute * 60)),
 		CodeHash:  codeHash,
 		Purpose:   purpose,
 		UserId:    userId,
