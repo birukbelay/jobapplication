@@ -27,7 +27,7 @@ func (ah *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
 	query := generic.WhereStr{
-		Query: "Job.CreatedBy", Args: []interface{}{v.UserId},
+		Query: "company_id", Args: []interface{}{v.UserId},
 	}
 	opts := &generic.Opt{
 		WhereQuery: []generic.WhereStr{query},
@@ -43,7 +43,7 @@ func (ah *HumaHandler) UpdateApplications(ctx context.Context, dto *dtos.HumaReq
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
 	query := generic.WhereStr{
-		Query: "Job.CreatedBy", Args: []interface{}{v.UserId},
+		Query: "company_id", Args: []interface{}{v.UserId},
 	}
 	opts := &generic.Opt{
 		WhereQuery: []generic.WhereStr{query},
@@ -67,6 +67,14 @@ func (ah *HumaHandler) CreateApplication(ctx context.Context, dto *dtos.HumaReqB
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
 	dto.Body.ApplicantID = v.UserId
+	//todo
+
+	jobResp, err := generic.DbGetOneByID[models.Job](ah.GHandler.GormConn, ctx, dto.Body.JobID, nil)
+	if err != nil {
+		return dtos.HumaReturnG(dtos.BadReqM[models.Application](err.Error()), err)
+	}
+	dto.Body.CompanyID = jobResp.Body.CompanyID
+
 	resp, err := generic.DbCreateOne[models.Application](ah.GHandler.GormConn, ctx, dto.Body, nil)
 	if err != nil {
 		return dtos.HumaReturnG(resp, err)

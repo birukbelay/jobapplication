@@ -51,8 +51,8 @@ var OperationMap = map[consts.OperationId]models.OperationAccess{
 	UpdateJob:           {AllowedRoles: []string{enums.COMPANY.S()}, Description: "Update an existing job"},
 	DeleteJob:           {AllowedRoles: []string{enums.COMPANY.S()}, Description: "Delete a job posting"},
 	//clients
-	GetOpenJobs:       {AllowedRoles: []string{enums.APPLICANT.S()}, Description: "Get open Jobs For applicants"},
-	GetOneOpenJobById: {AllowedRoles: []string{enums.COMPANY.S()}, Description: "Get a specific job by ID"},
+	GetOpenJobs:       {AllowedRoles: []string{enums.APPLICANT.S(), enums.COMPANY.S()}, Description: "Get open Jobs For applicants"},
+	GetOneOpenJobById: {AllowedRoles: []string{enums.APPLICANT.S(), enums.COMPANY.S()}, Description: "Get a specific job by ID"},
 }
 
 func SetupJobRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, serv *Service) {

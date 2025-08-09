@@ -51,14 +51,14 @@ func (q JobQuery) GetQueries() (string, []string) {
 type Application struct {
 	Base           `mapstructure:",squash"`
 	ApplicationDto `mapstructure:",squash"`
-	Job            Job  `gorm:"foreignKey:JobID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-	Applicant      User `gorm:"foreignKey:ApplicantID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Job            Job    `gorm:"foreignKey:JobID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Applicant      User   `gorm:"foreignKey:ApplicantID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Status         string `json:"status,omitempty" gorm:"default:'Applied'"`
 }
 type ApplicationDto struct {
-	ApplicantID string `json:"applicant_id,omitempty" gorm:"not null;index"`
+	ApplicantID string `json:"-" gorm:"not null;index"`
+	CompanyID   string `json:"-" `
 	JobID       string `json:"job_id,omitempty" gorm:"not null;index"`
-	//
-	Status      string `json:"status,omitempty" gorm:"default:'pending'"`
 	CoverLetter string `json:"cover_letter,omitempty"`
 	ResumeUrl   string `json:"resume_url,omitempty"`
 }
@@ -68,7 +68,7 @@ func (d ApplicationDto) SetOnCreate(key string) {
 }
 
 type StatusUpdateDto struct {
-	Status string `json:"status,omitempty"`
+	Status string `json:"status,omitempty" enums:"Applied,Reviewed,Interview,Rejected,Hired"`
 }
 
 type ApplicationUpdateDto struct {

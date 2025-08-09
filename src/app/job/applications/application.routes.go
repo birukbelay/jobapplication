@@ -88,6 +88,15 @@ func SetupApplicationRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 	}, genericController.UpdateApplications)
 
 	//==============  Aplicants ===============
+	// Create new application (apply for job)
+	huma.Register(humaRouter, huma.Operation{
+		OperationID: CreateApplication.Str(),
+		Description: "Apply for a job by creating an application",
+		Method:      http.MethodPost,
+		Path:        path,
+		Tags:        tags,
+		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateApplication, OperationMap[CreateApplication].AllowedRoles, nil)},
+	}, genericController.CreateApplication)
 
 	// Update  My application application
 	huma.Register(humaRouter, huma.Operation{
@@ -128,13 +137,5 @@ func SetupApplicationRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 		Tags:        tags,
 		Middlewares: huma.Middlewares{cmnServ.Authorization(GetMyApplications, OperationMap[GetMyApplications].AllowedRoles, nil)},
 	}, genericController.GetMyApplications)
-	// Create new application (apply for job)
-	huma.Register(humaRouter, huma.Operation{
-		OperationID: CreateApplication.Str(),
-		Description: "Apply for a job by creating an application",
-		Method:      http.MethodPost,
-		Path:        path,
-		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateApplication, OperationMap[CreateApplication].AllowedRoles, nil)},
-	}, genericController.CreateApplication)
+
 }
