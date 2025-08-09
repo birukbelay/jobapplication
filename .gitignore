@@ -307,14 +307,19 @@ Temporary Items
 !.gitsubmodules
 
 tmp/
+!public/static/*
 public/
 
 .devcontainer
 /public/assets/*
-!/public/static/
-!public/static
+
 
 .env*
 !.env.example
 !public/static/styles/*
+
+!/public/static/
+!/public/static/*
+!public/static
+!public/static/*
 

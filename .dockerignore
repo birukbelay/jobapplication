@@ -314,3 +314,5 @@ Docker
 !public/static/styles/*
 !/public/static/
 !public/static
+!public/static/*
+!/public/static/*

@@ -9,13 +9,13 @@ import (
 	"github.com/birukbelay/gocmn/src/crypto"
 	"github.com/birukbelay/gocmn/src/logger"
 	"github.com/birukbelay/gocmn/src/provider/db"
+	"github.com/birukbelay/gocmn/src/provider/email"
 	"github.com/birukbelay/gocmn/src/provider/upload"
 	"github.com/birukbelay/gocmn/src/util"
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 
 	"github.com/projTemplate/goauth/src/models/config"
-	"github.com/projTemplate/goauth/src/providers/email"
 )
 
 type IProviderS struct {

@@ -1,11 +1,14 @@
 package common
 
+import "github.com/birukbelay/gocmn/src/provider/email"
+
 type EnvVar string
 
 const (
 	RefreshToken = "refresh-token"
 	AccessToken  = "access-token"
 )
+
 // const ApiV1 = "/api/v1"
 
 // type ContextKey string
@@ -18,8 +21,7 @@ const (
 // 	return string(o)
 // }
 
-type EmailTemplatePaths string
-
 const (
-	VerificationTemplate = EmailTemplatePaths("")
+	VerificationTemplate   = email.EmailTemplates("verification_code.html")
+	UserInvitationTemplate = email.EmailTemplates("user_invitation.html")
 )

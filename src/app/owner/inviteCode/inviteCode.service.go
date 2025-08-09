@@ -7,12 +7,14 @@ import (
 	"github.com/birukbelay/gocmn/src/dtos"
 	"github.com/birukbelay/gocmn/src/generic"
 	"github.com/birukbelay/gocmn/src/logger"
+
+	// "github.com/birukbelay/gocmn/src/provider/email"
 	"github.com/birukbelay/gocmn/src/resp_const"
 	"github.com/birukbelay/gocmn/src/util"
 
+	"github.com/projTemplate/goauth/src/common"
 	"github.com/projTemplate/goauth/src/models"
 	"github.com/projTemplate/goauth/src/models/enums"
-	"github.com/projTemplate/goauth/src/providers/email"
 )
 
 //Tasks
@@ -41,7 +43,7 @@ func (aus Service) CreateAndSendInviteCode(ctx context.Context, to, companyId st
 		Code: invitationCode,
 	}
 
-	emailerr := aus.ProvServ.EmailSender.SendEmail(to, "Invitation to Join Company", email.UserInvitationTemplate, emailStruct)
+	emailerr := aus.ProvServ.EmailSender.SendEmail(to, "Invitation to Join Company", common.UserInvitationTemplate, emailStruct)
 	if emailerr != nil {
 		return dtos.InternalErrMS[models.InviteCode]("Sending Email error"), emailerr
 	}

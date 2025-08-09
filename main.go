@@ -5,15 +5,15 @@ import (
 	"io/fs"
 
 	cmnConf "github.com/birukbelay/gocmn/src/config"
-	// cloudinaryServ2 "github.com/Iscanner1/api/src/providers/upload/cloudinaryServ"
 	"github.com/birukbelay/gocmn/src/provider/db/redis"
 	"github.com/birukbelay/gocmn/src/provider/upload/cloudinaryServ"
+	email "github.com/birukbelay/gocmn/src/provider/email/smtp"
 
 	"github.com/projTemplate/goauth/src/models/config"
+	"github.com/projTemplate/goauth/public/static/templates"
 	"github.com/projTemplate/goauth/src/models/migration"
 	Idb "github.com/projTemplate/goauth/src/providers"
 	sql_db "github.com/projTemplate/goauth/src/providers/db/sql_db"
-	email "github.com/projTemplate/goauth/src/providers/email/smtp"
 	IGin "github.com/projTemplate/goauth/src/server"
 )
 
@@ -35,7 +35,7 @@ func main() {
 	//Creating upload service
 	//fileServ := diskUpload.NewDidkUploader(conf)
 
-	emailSender := email.NewSmtp(conf.SmtpHost, conf.SmtpPort, conf.SmtpPwd, conf.SmtpUsername) //email sending provider
+	emailSender := email.NewSmtp(conf.SmtpHost, conf.SmtpPort, conf.SmtpPwd, conf.SmtpUsername, templates.Embedded) //email sending provider
 	cloudinary := cloudinaryServ.NewCloudinaryUploader(&conf.CloudinaryConfig)                  //file upload provider
 	provider := Idb.NewProvider(Db, conf, emailSender, emailSender, redis, cloudinary)
 	ginApp := IGin.CreateFiber(provider, conf)
