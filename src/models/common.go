@@ -9,10 +9,6 @@ import (
 	"github.com/projTemplate/goauth/src/models/enums"
 )
 
-func Ptr[T any](value T) *T {
-	return &value
-}
-
 type Base struct {
 	ID        string     `gorm:"primarykey" json:"id,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`

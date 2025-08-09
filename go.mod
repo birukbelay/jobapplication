@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.11
 
 require (
-	github.com/birukbelay/gocmn v1.0.6
+	github.com/birukbelay/gocmn v1.0.7
 	github.com/danielgtaylor/huma/v2 v2.34.1
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1
@@ -14,7 +14,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/rs/zerolog v1.34.0
-	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.1
 )
 
@@ -77,6 +76,7 @@ require (
 	golang.org/x/text v0.27.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/postgres v1.6.0 // indirect
 )
 
 // replace github.com/birukbelay/gocmn => ../goCmn
