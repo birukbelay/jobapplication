@@ -8,7 +8,7 @@ type Job struct {
 	Base   `mapstructure:",squash"`
 	JobDto `mapstructure:",squash"`
 	// Applications []Application `gorm:"foreignKey:JobID"`
-	CreatedBy User `gorm:"foreignKey:CreatedBy"`
+	CreatedBy User `gorm:"foreignKey:CompanyID"`
 }
 type JobDto struct {
 	Title       string          `json:"title,omitempty"`
@@ -17,11 +17,11 @@ type JobDto struct {
 	JobStatus   enums.JobStatus `json:"job_status,omitempty" enum:"Draft,Open,Closed"`
 
 	//Relationships
-	CreatedBy string `json:"created_by,omitempty"`
+	CompanyID string `json:"company_id,omitempty"`
 }
 
 func (d JobDto) SetOnCreate(key string) {
-	d.CreatedBy = key
+	d.CompanyID = key
 }
 
 type JobUpdateDto struct {

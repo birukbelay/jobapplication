@@ -44,6 +44,12 @@ func (jh *HumaHandler) GetOpenJobs(ctx context.Context, filter *struct {
 	return dtos.PHumaReturn(resp, err)
 }
 
+func (jh *HumaHandler) GetOneOpenJobById(ctx context.Context, filter *dtos.HumaInputId) (*dtos.HumaResponse[dtos.GResp[models.Job]], error) {
+
+	resp, err := generic.DbGetOne[models.Job](jh.GHandler.GormConn, ctx, models.JobFilter{ID: filter.ID, JobStatus: enums.STATUS_OPEN}, nil)
+	return dtos.HumaReturnG(resp, err)
+}
+
 // func (jh *HumaHandler) CreateJob(ctx context.Context, input *struct {
 // 	Body models.JobDto `json:"job"`
 // }) (*dtos.HumaResponse[models.Job], error) {
