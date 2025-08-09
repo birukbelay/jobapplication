@@ -17,7 +17,7 @@ type Admin struct {
 type User struct {
 	Base    `mapstructure:",squash" `
 	UserDto `mapstructure:",squash" `
-	Company Company `json:"member_company,omitempty" gorm:"foreignKey:CompanyID"`
+	Company *Company `json:"member_company,omitempty" gorm:"foreignKey:CompanyID"`
 }
 
 type UserDto struct {
