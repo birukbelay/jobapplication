@@ -67,16 +67,19 @@ func (d ApplicationDto) SetOnCreate(key string) {
 	d.ApplicantID = key
 }
 
+type StatusUpdateDto struct {
+	Status string `json:"status,omitempty"`
+}
+
 type ApplicationUpdateDto struct {
-	Status      string `json:"status,omitempty"`
 	CoverLetter string `json:"cover_letter,omitempty"`
 	Resume      string `json:"resume,omitempty"`
 }
 type ApplicationFilter struct {
-	ID          string `query:"id,omitempty"`
-	ApplicantID string `query:"applicant_id,omitempty"`
-	JobID       string `query:"job_id,omitempty"`
-	Status      string `query:"status,omitempty"`
+	ID          string `query:"id"`
+	ApplicantID string `query:"applicant_id"`
+	JobID       string `query:"job_id"`
+	Status      string `query:"status"`
 }
 type ApplicationQuery struct {
 	SelectedFields []string `query:"selected_fields" enum:"applicant_id,job_id,status,cover_letter,resume,id,created_at,updated_at"`
