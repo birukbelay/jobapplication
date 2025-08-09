@@ -2,6 +2,38 @@
 
 A robust Go-based REST API for managing job postings and applications, built with modern technologies and best practices.
 
+
+## 📝 Development Notes
+
+### Project Structure
+
+- this project uses a **Common Library**: custom  Reusable code, imported as library for common functionality found at "github.com/birukbelay/gocmn"
+
+common libraries features includes: 
+- file upload
+- email sending
+- response types
+- generic controllers
+- generic database operations
+- api documentation & default server
+- cryptography related functions
+- 
+```
+├── src/
+│   ├── app/                 # Application routes and handlers
+│   │   ├── account/         # Authentication and profile
+│   │   ├── admin/           # Admin management
+│   │   ├── job/             # Job and application management
+│   │   └── general/         # General utilities (upload, etc.)
+│   ├── models/              # Data models and database schemas
+│   ├── providers/           # Service providers and dependencies
+│   └── server/              # Server configuration and routing
+├── public/                  # Static files and templates
+├── docker-compose.yml       # Development environment
+└── main.go                  # Application entry point
+```
+
+---
 ## 🚀 Features
 
 - **User Authentication & Authorization**: JWT-based auth with role-based access control
@@ -12,6 +44,9 @@ A robust Go-based REST API for managing job postings and applications, built wit
 - **Email Notifications**: SMTP-based email system
 - **Database Migrations**: Automated database schema management
 - **API Documentation**: Auto-generated OpenAPI/Swagger documentation
+- **Common Library**: Reusable code for common functionality found at "github.com/birukbelay/gocmn"
+
+
 
 ## default values
 
@@ -277,26 +312,7 @@ The application uses a hierarchical configuration system:
 2. `.env` file
 3. `.env.<ENVIRONMENT>` file (e.g., `.env.dev`, `.env.prod`)
 
-## 📝 Development Notes
 
-### Project Structure
-
-```
-├── src/
-│   ├── app/                 # Application routes and handlers
-│   │   ├── account/         # Authentication and profile
-│   │   ├── admin/           # Admin management
-│   │   ├── job/             # Job and application management
-│   │   └── general/         # General utilities (upload, etc.)
-│   ├── models/              # Data models and database schemas
-│   ├── providers/           # Service providers and dependencies
-│   └── server/              # Server configuration and routing
-├── public/                  # Static files and templates
-├── docker-compose.yml       # Development environment
-└── main.go                  # Application entry point
-```
-
----
 
 ## 🏗 Technical Implementation & Design Decisions
 
