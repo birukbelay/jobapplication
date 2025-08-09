@@ -33,12 +33,12 @@ type JobUpdateDto struct {
 type JobFilter struct {
 	ID        string          `query:"id"`
 	Title     string          `query:"title"`
-	CreatedBy string          `query:"owner_id"`
+	CompanyID string          `query:"company_id"`
 	Location  string          `query:"location"`
 	JobStatus enums.JobStatus `query:"job_status" enum:"Draft,Open,Closed"`
 }
 type JobQuery struct {
-	SelectedFields []string `query:"selected_fields" enum:"title,description,location,job_status,owner_id,id,created_at,updated_at"`
+	SelectedFields []string `query:"selected_fields" enum:"title,description,location,job_status,company_id,id,created_at,updated_at"`
 	Sort           string   `query:"sort" enum:"title,location,job_status,created_at,updated_at"`
 }
 

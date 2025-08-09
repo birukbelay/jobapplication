@@ -26,7 +26,7 @@ func (jh *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 	if !ok {
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
-	filter.JobFilter.CreatedBy = v.UserId
+	filter.JobFilter.CompanyID = v.UserId
 	resp, err := generic.DbFetchManyWithOffset[models.Job](jh.GHandler.GormConn, ctx, filter.JobFilter, filter.PaginationInput, nil)
 	return dtos.PHumaReturn(resp, err)
 }
