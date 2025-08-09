@@ -34,6 +34,3 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ env.LOWERCASE_OWNER }}/my-app:latest
-      - name: Deploy to Render
-        run: |
-          curl -X GET ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
