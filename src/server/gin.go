@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"io/fs"
 	"net/http"
 
 	cmn "github.com/birukbelay/gocmn/src/logger"
@@ -16,14 +15,12 @@ import (
 	"github.com/projTemplate/goauth/src/providers"
 )
 
-type MainServer struct {
+type GinServer struct {
 	Engine  *gin.Engine
 	EnvConf *conf.EnvConfig
 }
 
-var EmbeddedAssets fs.FS
-
-func Create(dbs providers.IProviderS, conf *conf.EnvConfig) *MainServer {
+func Create(dbs providers.IProviderS, conf *conf.EnvConfig) *GinServer {
 	router := gin.Default()
 	//router.Use(CORSMiddleware())
 	router.Use(cors.New(cors.Config{
@@ -41,7 +38,7 @@ func Create(dbs providers.IProviderS, conf *conf.EnvConfig) *MainServer {
 	router.GET("/", func(c *gin.Context) {
 		c.String(200, "holla")
 	})
-	serv := &MainServer{
+	serv := &GinServer{
 		Engine:  router,
 		EnvConf: conf,
 	}
@@ -50,7 +47,7 @@ func Create(dbs providers.IProviderS, conf *conf.EnvConfig) *MainServer {
 	config.DocsPath = ""
 
 	humaRouter := humagin.New(router, config)
-	router.GET("/docs", ServDock)
+	router.GET("/docs", ServGinDoc)
 	//huma.AutoRegister(humaRouter, As{})
 
 	serv.SetupMiddleware()
@@ -59,14 +56,14 @@ func Create(dbs providers.IProviderS, conf *conf.EnvConfig) *MainServer {
 
 	return serv
 }
-func (s *MainServer) SetupMiddleware() {
+func (s *GinServer) SetupMiddleware() {
 	s.Engine.Use(gin.Logger())
 	s.Engine.Use(gin.Recovery())
 	s.Engine.Static("/assets", "./public/assets")
 	s.Engine.StaticFS("/static", http.FS(EmbeddedAssets))
 }
 
-func (s *MainServer) Listen() error {
+func (s *GinServer) Listen() error {
 	s.Engine.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong")
 	})
@@ -79,7 +76,7 @@ func (s *MainServer) Listen() error {
 	return err
 }
 
-func (s *MainServer) SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IProviderS) {
+func (s *GinServer) SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IProviderS) {
 
 	//core
 

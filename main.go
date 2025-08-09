@@ -6,38 +6,43 @@ import (
 
 	cmnConf "github.com/birukbelay/gocmn/src/config"
 	"github.com/birukbelay/gocmn/src/provider/db/redis"
-	"github.com/birukbelay/gocmn/src/provider/upload/cloudinaryServ"
+	sql_db "github.com/birukbelay/gocmn/src/provider/db/sql"
 	email "github.com/birukbelay/gocmn/src/provider/email/smtp"
+	"github.com/birukbelay/gocmn/src/provider/upload/cloudinaryServ"
 
-	"github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/public/static/templates"
+	"github.com/projTemplate/goauth/src/models/config"
 	"github.com/projTemplate/goauth/src/models/migration"
 	Idb "github.com/projTemplate/goauth/src/providers"
-	sql_db "github.com/projTemplate/goauth/src/providers/db/sql_db"
-	IGin "github.com/projTemplate/goauth/src/server"
+	"github.com/projTemplate/goauth/src/server"
 )
 
 //go:embed public/static/styles
 var EmbedAsset embed.FS
 
 func main() {
+	// Embedding the huma documentation assets
 	embeddedAssets, err := fs.Sub(EmbedAsset, "public/static/styles")
 	if err != nil {
 		panic(err)
 	}
-	IGin.EmbeddedAssets = embeddedAssets
-
+	server.EmbeddedAssets = embeddedAssets
+	//Loading the config
 	conf := cmnConf.LoadConfigT[config.EnvConfig]()
+	//Creating the database connection
 	Db, _ := sql_db.NewSqlDb(&conf.SqlDbConfig)
 	migration.MigrateDb2(Db)
+	//Creating redis service
 	redis, err := redis.NewRedis(&conf.KeyValConfig)
-
+	//email sending provider, also serves as verification code sender
+	emailSender := email.NewSmtp(conf.SmtpHost, conf.SmtpPort, conf.SmtpPwd, conf.SmtpUsername, templates.Embedded)
 	//Creating upload service
-	//fileServ := diskUpload.NewDidkUploader(conf)
-
-	emailSender := email.NewSmtp(conf.SmtpHost, conf.SmtpPort, conf.SmtpPwd, conf.SmtpUsername, templates.Embedded) //email sending provider
-	cloudinary := cloudinaryServ.NewCloudinaryUploader(&conf.CloudinaryConfig)                  //file upload provider
+	cloudinary := cloudinaryServ.NewCloudinaryUploader(&conf.CloudinaryConfig) //file upload provider
+	//createing the Provider, with, db, email, redis, fileUpload services
 	provider := Idb.NewProvider(Db, conf, emailSender, emailSender, redis, cloudinary)
-	ginApp := IGin.CreateFiber(provider, conf)
-	_ = ginApp.Listen()
+	//create the server with default configs
+	srvr := server.CreateFiber(conf.ServerHost, conf.ServerPort)
+	//Setting up the routes
+	server.SetHumaCoreRoutes(srvr.HumaRouter, provider, conf)
+	_ = srvr.Listen()
 }

@@ -6,25 +6,15 @@ type EnvConfig struct {
 	ServerPort string `koanf:"SERVER_PORT"`
 	ServerHost string `koanf:"SERVER_HOST"`
 
-	SqlDbConfig SqlDbConfig `koanf:",squash"`
+	// SqlDbConfig SqlDbConfig `koanf:",squash"`
 	JwtVar
-	// S3Config
-	// CloudinaryConfig
+
+	conf.SqlDbConfig
 
 	SmtpCred
 	conf.CloudinaryConfig
 	conf.S3Config
 	conf.KeyValConfig
-}
-
-type SqlDbConfig struct {
-	DbName   string `koanf:"POSTGRES_DB"`
-	Username string `koanf:"POSTGRES_USER"`
-	Password string `koanf:"POSTGRES_PASSWORD"`
-	SqlHost  string `koanf:"POSTGRES_HOST"`
-	SqlPort  string `koanf:"POSTGRES_PORT"`
-	Driver   string `koanf:"SQL_DRIVER"`
-	SSLMode  string `koanf:"SSL_MODE"`
 }
 
 type JwtVar struct {

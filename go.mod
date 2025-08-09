@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.11
 
 require (
-	github.com/birukbelay/gocmn v1.0.5
+	github.com/birukbelay/gocmn v1.0.6
 	github.com/danielgtaylor/huma/v2 v2.34.1
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1

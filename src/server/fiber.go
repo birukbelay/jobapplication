@@ -8,6 +8,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humafiber"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	zlog "github.com/rs/zerolog/log"
 
@@ -25,36 +26,35 @@ import (
 )
 
 type FiberServer struct {
-	Engine  *fiber.App
-	EnvConf *conf.EnvConfig
+	Engine     *fiber.App
+	HumaRouter huma.API
+	ServerHost string
+	ServerPort string
 }
 
-func CreateFiber(dbs *providers.IProviderS, conf *conf.EnvConfig) *FiberServer {
+func CreateFiber(host, port string) *FiberServer {
 
 	app := fiber.New()
+	app.Use(cors.New())
 
 	app.Get("/fiber", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
+	app.Get("/docs", ServFiberDoc)
 
-	serv := &FiberServer{
-		Engine:  app,
-		EnvConf: conf,
-	}
 	//huma related path
 	config := huma.DefaultConfig("", "")
 	config.DefaultFormat = "application/json"
 	config.DocsPath = "/"
+	serv := &FiberServer{
+		Engine:     app,
+		ServerHost: host,
+		ServerPort: port,
+	}
 	serv.SetupMiddleware()
 
 	humaRouter := humafiber.NewWithGroup(app, app, config)
-	app.Get("/docs", ServFiberDock)
-	// v1 := app.Group("/api/v1")
-
-	serv.SetHumaCoreRoutes(humaRouter, dbs)
-	for _, x := range app.GetRoutes() {
-		fmt.Printf("=> %s:%s\n", x.Method, x.Path)
-	}
+	serv.HumaRouter = humaRouter
 
 	return serv
 }
@@ -66,19 +66,15 @@ func (s *FiberServer) SetupMiddleware() {
 		Root: http.FS(EmbeddedAssets),
 		// PathPrefix: "static",
 	}))
-
-	// s.Engine.StaticFS("/static", http.FS(EmbeddedAssets))
 }
 
 func (s *FiberServer) Listen() error {
-	// s.Engine.GET("/ping", func(c *gin.Context) {
-	// 	c.String(200, "pong")
-	// })
+
 	s.Engine.Get("/ping", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
-	cmn.LogTrace("server started at", fmt.Sprintf("http://127.0.0.1:%s/docs", s.EnvConf.ServerPort))
-	err := s.Engine.Listen(s.EnvConf.ServerHost + ":" + s.EnvConf.ServerPort)
+	cmn.LogTrace("server started at", fmt.Sprintf("http://127.0.0.1:%s/docs", s.ServerPort))
+	err := s.Engine.Listen(s.ServerHost + ":" + s.ServerPort)
 
 	if err != nil {
 		zlog.Panic().Err(err).Msg("listen Error")
@@ -86,13 +82,13 @@ func (s *FiberServer) Listen() error {
 	return err
 }
 
-func (s *FiberServer) SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IProviderS) {
+func SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IProviderS, conf *conf.EnvConfig) {
 
 	//core
 
 	//account routes
-	auth.SetupAdminAuthRoutes(humaRouter, dbs, auth.NewAdminAuthServH[models.Admin](s.EnvConf, dbs))
-	auth.SetupUserAuthRoutes(humaRouter, dbs, auth.NewAdminAuthServH[models.User](s.EnvConf, dbs))
+	auth.SetupAdminAuthRoutes(humaRouter, dbs, auth.NewAdminAuthServH[models.Admin](conf, dbs))
+	auth.SetupUserAuthRoutes(humaRouter, dbs, auth.NewAdminAuthServH[models.User](conf, dbs))
 	//profile related routes
 	profile.SetAdminProfileRoutes(humaRouter, dbs)
 	profile.SetUserProfileRoutes(humaRouter, dbs)
@@ -104,7 +100,6 @@ func (s *FiberServer) SetHumaCoreRoutes(humaRouter huma.API, dbs *providers.IPro
 	inviteCode.SetupInviteCodeRoutes(humaRouter, dbs, inviteCode.NewService(dbs))
 	user.SetupCompanyUserRoutes(humaRouter, dbs, user.NewService(dbs))
 	upload.SetupUploadRoutes(humaRouter, dbs, upload.NewUploadGormServ(dbs))
-	// //Admin Routes
 
 	// //common routes
 	// upload2.SetupUploadRoutes(humaRouter, cmnService, upload2.NewUploadGormServ(dbs.Gorm, cmnService))
