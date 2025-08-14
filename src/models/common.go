@@ -28,6 +28,7 @@ type IntUsr interface {
 	GetPwd() string
 	GetStatus() enums.AccountStatus
 	GetCompanyId() string
+	GetInfo() string
 }
 
 func (b Base) GetID() string {
@@ -41,6 +42,9 @@ func (u UserDto) GetRole() string {
 }
 func (u UserDto) GetPwd() string {
 	return u.Password
+}
+func (u UserDto) GetInfo() string {
+	return *u.Email
 }
 func (u UserDto) GetStatus() enums.AccountStatus {
 	return u.AccountStatus

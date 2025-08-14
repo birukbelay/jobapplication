@@ -45,15 +45,15 @@ func (aus Service[T]) UTIL_SendVerification(ctx context.Context, email, userId s
 	}
 	emailerr := aus.Provider.VerificationCodeSender.SendVerificationCode(email, verificationCode)
 	if emailerr != nil {
-		return dtos.InternalErrMS[bool]("Sending Email error"), emailerr
+		// return dtos.InternalErrMS[bool]("Sending Email error"), emailerr
 	}
 	verificationResp, err := generic.DbUpsertOneAllFields[models.VerificationCode](aus.Provider.GormConn, ctx, models.VerificationCode{
-		ExpiresAt: util.Ptr(time.Now().Add(time.Minute * 3)),
+		ExpiresAt: util.Ptr(time.Now().Add(time.Minute * 60)),
 		CodeHash:  codeHash,
 		Purpose:   purpose,
 		UserId:    userId,
 		Email:     email,
-	}, []clause.Column{{Name: "user_id"}}, &generic.Opt{Debug: true})
+	}, []clause.Column{{Name: "email"}}, &generic.Opt{Debug: true})
 	if err != nil {
 		logger.LogTrace("error crating", err)
 		return dtos.InternalErrMS[bool]("creating Error"), err
@@ -62,12 +62,13 @@ func (aus Service[T]) UTIL_SendVerification(ctx context.Context, email, userId s
 }
 
 // VerifyCode TODO: add reason of error, like code expires
-func (aus Service[T]) VerifyCode(ctx context.Context, userId string, code string) bool {
-	codeModel, err := generic.DbGetOne[models.VerificationCode](aus.Provider.GormConn, ctx, models.VerificationCode{UserId: userId}, nil)
+func (aus Service[T]) VerifyCode(ctx context.Context, email string, code string) bool {
+	codeModel, err := generic.DbGetOne[models.VerificationCode](aus.Provider.GormConn, ctx, models.VerificationCode{Email: email}, nil)
 	if err != nil {
 		return false
 	}
-	if codeModel.Body.ExpiresAt.After(time.Now()) {
+	//if the expiry date is Passed
+	if codeModel.Body.ExpiresAt.Before(time.Now()) {
 		return false
 	}
 	valid := ICrypt.BcryptPasswordsMatch(code, codeModel.Body.CodeHash)

@@ -8,7 +8,7 @@ type Job struct {
 	Base   `mapstructure:",squash"`
 	JobDto `mapstructure:",squash"`
 	// Applications []Application `gorm:"foreignKey:JobID"`
-	CreatedBy User `gorm:"foreignKey:CreatedBy"`
+	CreatedBy User `gorm:"foreignKey:CompanyID"`
 }
 type JobDto struct {
 	Title       string          `json:"title,omitempty"`
@@ -17,27 +17,28 @@ type JobDto struct {
 	JobStatus   enums.JobStatus `json:"job_status,omitempty" enum:"Draft,Open,Closed"`
 
 	//Relationships
-	CreatedBy string `json:"created_by,omitempty"`
+	CompanyID string `json:"company_id,omitempty" gorm:"not null;index"`
 }
 
 func (d JobDto) SetOnCreate(key string) {
-	d.CreatedBy = key
+	d.CompanyID = key
 }
 
 type JobUpdateDto struct {
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Location    string `json:"location,omitempty"`
+	Title       string          `json:"title,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Location    string          `json:"location,omitempty"`
+	JobStatus   enums.JobStatus `json:"job_status,omitempty" enum:"Draft,Open,Closed"`
 }
 type JobFilter struct {
 	ID        string          `query:"id"`
 	Title     string          `query:"title"`
-	CreatedBy string          `query:"owner_id"`
+	CompanyID string          `query:"company_id"`
 	Location  string          `query:"location"`
-	JobStatus enums.JobStatus `query:"job_status"`
+	JobStatus enums.JobStatus `query:"job_status" enum:"Draft,Open,Closed"`
 }
 type JobQuery struct {
-	SelectedFields []string `query:"selected_fields" enum:"title,description,location,job_status,owner_id,id,created_at,updated_at"`
+	SelectedFields []string `query:"selected_fields" enum:"title,description,location,job_status,company_id,id,created_at,updated_at"`
 	Sort           string   `query:"sort" enum:"title,location,job_status,created_at,updated_at"`
 }
 
@@ -50,31 +51,35 @@ func (q JobQuery) GetQueries() (string, []string) {
 type Application struct {
 	Base           `mapstructure:",squash"`
 	ApplicationDto `mapstructure:",squash"`
-	Job            Job  `gorm:"foreignKey:JobID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-	Applicant      User `gorm:"foreignKey:ApplicantID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Job            Job    `gorm:"foreignKey:JobID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Applicant      User   `gorm:"foreignKey:ApplicantID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Status         string `json:"status,omitempty" gorm:"default:'Applied'"`
 }
 type ApplicationDto struct {
-	ApplicantID string `json:"applicant_id,omitempty" gorm:"not null;index"`
+	ApplicantID string `json:"-" gorm:"not null;index"`
+	CompanyID   string `json:"-" `
 	JobID       string `json:"job_id,omitempty" gorm:"not null;index"`
-	Status      string `json:"status,omitempty" gorm:"default:'pending'"`
 	CoverLetter string `json:"cover_letter,omitempty"`
-	Resume      string `json:"resume,omitempty"`
+	ResumeUrl   string `json:"resume_url,omitempty"`
 }
 
 func (d ApplicationDto) SetOnCreate(key string) {
 	d.ApplicantID = key
 }
 
+type StatusUpdateDto struct {
+	Status string `json:"status,omitempty" enums:"Applied,Reviewed,Interview,Rejected,Hired"`
+}
+
 type ApplicationUpdateDto struct {
-	Status      string `json:"status,omitempty"`
 	CoverLetter string `json:"cover_letter,omitempty"`
 	Resume      string `json:"resume,omitempty"`
 }
 type ApplicationFilter struct {
-	ID          string `query:"id,omitempty"`
-	ApplicantID string `query:"applicant_id,omitempty"`
-	JobID       string `query:"job_id,omitempty"`
-	Status      string `query:"status,omitempty"`
+	ID          string `query:"id"`
+	ApplicantID string `query:"applicant_id"`
+	JobID       string `query:"job_id"`
+	Status      string `query:"status"`
 }
 type ApplicationQuery struct {
 	SelectedFields []string `query:"selected_fields" enum:"applicant_id,job_id,status,cover_letter,resume,id,created_at,updated_at"`

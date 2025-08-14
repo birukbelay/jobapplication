@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/birukbelay/gocmn/src/consts"
+	"github.com/birukbelay/gocmn/src/generic"
 	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/projTemplate/goauth/src/models"
@@ -21,25 +22,41 @@ func NewService(genServ *providers.IProviderS) *Service {
 	}
 }
 
-const (
-	OffsetPaginatedApplications = consts.OperationId("App-1-OffsetPaginatedApplications")
-	GetOneApplicationById       = consts.OperationId("App-2-GetOneApplicationById")
+type HumaHandler struct {
+	Service  *Service
+	GHandler *generic.IGenericController[models.Application, models.ApplicationDto, models.ApplicationUpdateDto, models.ApplicationFilter, models.ApplicationQuery]
+}
 
-	UpdateApplication = consts.OperationId("App-4-UpdateApplication")
-	DeleteApplication = consts.OperationId("App-5-DeleteApplication")
+func NewHandler(serv *Service) *HumaHandler {
+	return &HumaHandler{
+		Service:  serv,
+		GHandler: generic.NewGenericController[models.Application, models.ApplicationDto, models.ApplicationUpdateDto, models.ApplicationFilter, models.ApplicationQuery](serv.ProvServ.GormConn),
+	}
+}
+
+const (
+	OffsetPaginatedApplications = consts.OperationId("App-1-MYCompaniesApplications")
+	GetOneApplicationByID       = consts.OperationId("App-2-GetApplicationBYID")
+
+	UpdateApplication   = consts.OperationId("App-3-UpdateApplication")
+	UpdateMyApplication = consts.OperationId("App-4-UpdateMyApplication")
 
 	//applicants
-	CreateApplication = consts.OperationId("App-3-CreateApplication")
-	GetMyApplications = consts.OperationId("App-6-GetMyApplications")
+	CreateApplication    = consts.OperationId("App-5-CreateApplication")
+	GetMyApplications    = consts.OperationId("App-6-GetMyApplications")
+	GetMyApplicationById = consts.OperationId("App-7-GetMyApplicationBYID")
+	DeleteApplication    = consts.OperationId("App-8-DeleteApplication")
 )
 
 var OperationMap = map[consts.OperationId]models.OperationAccess{
 	OffsetPaginatedApplications: {AllowedRoles: []string{enums.COMPANY.S(), enums.PLATFORM_ADMIN.S()}, Description: "Get paginated list of applications (for job owners)"},
-	GetOneApplicationById:       {AllowedRoles: []string{enums.COMPANY.S(), enums.PLATFORM_ADMIN.S()}, Description: "Get a specific application by ID"},
-	CreateApplication:           {AllowedRoles: []string{enums.COMPANY.S()}, Description: "Apply for a job"},
 	UpdateApplication:           {AllowedRoles: []string{enums.COMPANY.S()}, Description: "Update application (applicant can update details, owner can update status)"},
-	DeleteApplication:           {AllowedRoles: []string{enums.COMPANY.S()}, Description: "Withdraw application"},
-	GetMyApplications:           {AllowedRoles: []string{enums.APPLICANT.S()}, Description: "Get current user's applications"},
+
+	//applicants
+	CreateApplication:    {AllowedRoles: []string{enums.APPLICANT.S()}, Description: "Apply for a job"},
+	GetMyApplicationById: {AllowedRoles: []string{enums.APPLICANT.S(), enums.PLATFORM_ADMIN.S()}, Description: "Get  ID"},
+	GetMyApplications:    {AllowedRoles: []string{enums.APPLICANT.S()}, Description: "Get current user's applications"},
+	DeleteApplication:    {AllowedRoles: []string{enums.APPLICANT.S()}, Description: "Withdraw application"},
 }
 
 func SetupApplicationRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, serv *Service) {
@@ -60,16 +77,17 @@ func SetupApplicationRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 		Middlewares: huma.Middlewares{cmnServ.Authorization(OffsetPaginatedApplications, OperationMap[OffsetPaginatedApplications].AllowedRoles, nil)},
 	}, genericController.OffsetPaginated)
 
-	// Get application by ID
+	// Update application
 	huma.Register(humaRouter, huma.Operation{
-		OperationID: GetOneApplicationById.Str(),
-		Description: "Get a specific application by its ID",
-		Method:      http.MethodGet,
+		OperationID: UpdateApplication.Str(),
+		Description: "Update an application , job owner can update status)",
+		Method:      http.MethodPatch,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(GetOneApplicationById, OperationMap[GetOneApplicationById].AllowedRoles, nil)},
-	}, genericController.GHandler.GetOneById)
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateApplication, OperationMap[UpdateApplication].AllowedRoles, nil)},
+	}, genericController.UpdateApplications)
 
+	//==============  Aplicants ===============
 	// Create new application (apply for job)
 	huma.Register(humaRouter, huma.Operation{
 		OperationID: CreateApplication.Str(),
@@ -80,15 +98,25 @@ func SetupApplicationRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 		Middlewares: huma.Middlewares{cmnServ.Authorization(CreateApplication, OperationMap[CreateApplication].AllowedRoles, nil)},
 	}, genericController.CreateApplication)
 
-	// Update application
+	// Update  My application application
 	huma.Register(humaRouter, huma.Operation{
-		OperationID: UpdateApplication.Str(),
-		Description: "Update an application (applicant can update details, job owner can update status)",
+		OperationID: UpdateMyApplication.Str(),
+		Description: "Update My application (applicant can update details",
 		Method:      http.MethodPatch,
 		Path:        pathId,
 		Tags:        tags,
-		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateApplication, OperationMap[UpdateApplication].AllowedRoles, nil)},
+		Middlewares: huma.Middlewares{cmnServ.Authorization(UpdateMyApplication, OperationMap[UpdateMyApplication].AllowedRoles, nil)},
 	}, genericController.GHandler.UpdateOneById)
+
+	// Get application by ID
+	huma.Register(humaRouter, huma.Operation{
+		OperationID: GetMyApplicationById.Str(),
+		Description: "Get THe applicants own application by ID",
+		Method:      http.MethodGet,
+		Path:        pathId,
+		Tags:        tags,
+		Middlewares: huma.Middlewares{cmnServ.Authorization(GetMyApplicationById, OperationMap[GetMyApplicationById].AllowedRoles, nil)},
+	}, genericController.GHandler.GetOneById)
 
 	// Delete application (withdraw)
 	huma.Register(humaRouter, huma.Operation{
@@ -103,10 +131,11 @@ func SetupApplicationRoutes(humaRouter huma.API, cmnServ *providers.IProviderS, 
 	// Get current user's applications
 	huma.Register(humaRouter, huma.Operation{
 		OperationID: GetMyApplications.Str(),
-		Description: "Get current user's job applications",
+		Description: "Get current applicants's job applications",
 		Method:      http.MethodGet,
 		Path:        myApplicationsPath,
 		Tags:        tags,
 		Middlewares: huma.Middlewares{cmnServ.Authorization(GetMyApplications, OperationMap[GetMyApplications].AllowedRoles, nil)},
 	}, genericController.GetMyApplications)
+
 }

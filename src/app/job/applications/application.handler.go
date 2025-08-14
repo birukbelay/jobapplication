@@ -13,18 +13,6 @@ import (
 	"github.com/projTemplate/goauth/src/models"
 )
 
-type HumaHandler struct {
-	Service  *Service
-	GHandler *generic.IGenericController[models.Application, models.ApplicationDto, models.ApplicationUpdateDto, models.ApplicationFilter, models.ApplicationQuery]
-}
-
-func NewHandler(serv *Service) *HumaHandler {
-	return &HumaHandler{
-		Service:  serv,
-		GHandler: generic.NewGenericController[models.Application, models.ApplicationDto, models.ApplicationUpdateDto, models.ApplicationFilter, models.ApplicationQuery](serv.ProvServ.GormConn),
-	}
-}
-
 func (ah *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 	models.ApplicationFilter
 	models.ApplicationQuery
@@ -33,10 +21,45 @@ func (ah *HumaHandler) OffsetPaginated(ctx context.Context, filter *struct {
 	sort, selectedFields := filter.ApplicationQuery.GetQueries()
 	filter.PaginationInput.Select = selectedFields
 	filter.PaginationInput.SortBy = sort
-	resp, err := generic.DbFetchManyWithOffset[models.Application](ah.GHandler.GormConn, ctx, filter.ApplicationFilter, filter.PaginationInput, nil)
+
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
+	if !ok {
+		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
+	}
+	query := generic.WhereStr{
+		Query: "company_id", Args: []interface{}{v.UserId},
+	}
+	opts := &generic.Opt{
+		WhereQuery: []generic.WhereStr{query},
+		Debug:      true,
+	}
+	resp, err := generic.DbFetchManyWithOffset[models.Application](ah.GHandler.GormConn, ctx, filter.ApplicationFilter, filter.PaginationInput, opts)
 	return dtos.PHumaReturn(resp, err)
 }
+func (ah *HumaHandler) UpdateApplications(ctx context.Context, dto *dtos.HumaReqBodyId[models.StatusUpdateDto]) (*dtos.HumaResponse[dtos.GResp[models.Application]], error) {
 
+	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
+	if !ok {
+		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
+	}
+	query := generic.WhereStr{
+		Query: "company_id", Args: []interface{}{v.UserId},
+	}
+	opts := &generic.Opt{
+		WhereQuery: []generic.WhereStr{query},
+		Debug:      true,
+	}
+
+	resp, err := generic.DbUpdateByFilter[models.Application](ah.GHandler.GormConn, ctx, models.ApplicationFilter{ID: dto.ID}, dto.Body, opts)
+	if err != nil {
+		return dtos.HumaReturnG(resp, err)
+	}
+	return dtos.HumaReturnG(resp, err)
+}
+
+//==============  Aplicants ===============
+
+// TODO add file handler here
 func (ah *HumaHandler) CreateApplication(ctx context.Context, dto *dtos.HumaReqBody[models.ApplicationDto]) (*dtos.HumaResponse[dtos.GResp[models.Application]], error) {
 
 	v, ok := ctx.Value(common.CtxClaims.Str()).(crypto.CustomClaims)
@@ -44,6 +67,14 @@ func (ah *HumaHandler) CreateApplication(ctx context.Context, dto *dtos.HumaReqB
 		return nil, huma.NewError(http.StatusUnauthorized, "The Token is Not Correct Form")
 	}
 	dto.Body.ApplicantID = v.UserId
+	//todo
+
+	jobResp, err := generic.DbGetOneByID[models.Job](ah.GHandler.GormConn, ctx, dto.Body.JobID, nil)
+	if err != nil {
+		return dtos.HumaReturnG(dtos.BadReqM[models.Application](err.Error()), err)
+	}
+	dto.Body.CompanyID = jobResp.Body.CompanyID
+
 	resp, err := generic.DbCreateOne[models.Application](ah.GHandler.GormConn, ctx, dto.Body, nil)
 	if err != nil {
 		return dtos.HumaReturnG(resp, err)
@@ -65,6 +96,7 @@ func (ah *HumaHandler) GetMyApplications(ctx context.Context, filter *struct {
 	sort, selectedFields := filter.ApplicationQuery.GetQueries()
 	filter.PaginationInput.Select = selectedFields
 	filter.PaginationInput.SortBy = sort
+
 	filter.ApplicationFilter.ApplicantID = v.UserId
 
 	resp, err := generic.DbFetchManyWithOffset[models.Application](ah.GHandler.GormConn, ctx, filter.ApplicationFilter, filter.PaginationInput, nil)

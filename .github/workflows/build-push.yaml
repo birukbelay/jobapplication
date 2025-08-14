@@ -3,7 +3,7 @@ name: Build and Push Docker Image test
 # Trigger the workflow on push to the main branch or on pull requests
 on:
   push:
-    branches: [template]
+    branches: [template, main]
   pull_request:
     branches: [production]
 
@@ -34,3 +34,6 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ env.LOWERCASE_OWNER }}/my-app:latest
+      - name: Deploy to Render
+        run: |
+          curl -X GET https://api.render.com/deploy/srv-d2bht2mr433s739qcv30?key=OSr23Hxzfgw

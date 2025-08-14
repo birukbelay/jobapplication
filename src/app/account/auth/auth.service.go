@@ -78,7 +78,7 @@ func (aus Service[T]) VerifyUser(ctx context.Context, input VerificationInput) (
 		return dtos.BadReqC[bool](resp_const.InfoOrCode), resp_const.InfoOrCodeErr
 	}
 	//Validate the code
-	codeValid := aus.VerifyCode(ctx, models.GetID(usr.Body), input.Code)
+	codeValid := aus.VerifyCode(ctx, usr.Body.GetInfo(), input.Code)
 	if !codeValid {
 		return dtos.BadReqC[bool](resp_const.InfoOrCode), resp_const.InfoOrCodeErr
 	}
@@ -212,7 +212,7 @@ func (aus Service[T]) ResetPwd(ctx context.Context, input PwdResetInput) (dtos.G
 		return dtos.BadReqC[bool](resp_const.InfoOrCode), resp_const.InfoOrCodeErr
 	}
 	//2. Validate the code
-	codeValid := aus.VerifyCode(ctx, models.GetID(usr.Body), input.Code)
+	codeValid := aus.VerifyCode(ctx, usr.Body.GetInfo(), input.Code)
 	if !codeValid {
 		tx.Rollback()
 		return dtos.BadReqC[bool](resp_const.InfoOrCode), resp_const.InfoOrCodeErr

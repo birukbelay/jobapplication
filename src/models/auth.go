@@ -11,7 +11,7 @@ type RegisterUserInput struct {
 	LastName  string     `json:"lName" `
 	Email     string     `json:"email" binding:"required,email" gorm:"unique"`
 	Password  string     `json:"password" binding:"required,min=6"`
-	Role      enums.Role `gorm:"default:COMPANY" json:"role,omitempty"  enum:"COMPANY, APPLICANT"`
+	Role      enums.Role `gorm:"default:COMPANY" json:"role,omitempty"  enum:"COMPANY,APPLICANT"`
 }
 
 // ProfileUpdateDto This is Used for creating and updating the user
@@ -41,8 +41,8 @@ type Session struct {
 
 type VerificationCode struct {
 	Base      `mapstructure:",squash" `
-	UserId    string `gorm:"uniqueIndex;not null"`
-	Email     string
+	UserId    string      `gorm:"uniqueIndex;not null"`
+	Email     string      `gorm:"uniqueIndex;not null"`
 	CodeHash  string      `gorm:"not null"`
 	Purpose   CodePurpose `gorm:"not null"`
 	ExpiresAt *time.Time  `json:"-" `

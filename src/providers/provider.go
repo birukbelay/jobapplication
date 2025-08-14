@@ -86,7 +86,7 @@ func (gs *IProviderS) Authorization(operationId consts.OperationId, allowedRoles
 
 		ctx = huma.WithValue(ctx, common.CtxClaims.Str(), claims)
 		ctx = huma.WithValue(ctx, common.CTXCompany_ID.Str(), claims.CompanyId)
-		ctx = huma.WithValue(ctx, common.CTXUser_ID.Str(), claims.CompanyId)
+		ctx = huma.WithValue(ctx, common.CTXUser_ID.Str(), claims.UserId)
 		//=====================   Authorization ===================
 		if len(allowedRoles) > 0 {
 			if !util.ElementExists(claims.Role, allowedRoles...) {
